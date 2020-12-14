@@ -43,8 +43,10 @@ message CreateInterestResponse {
   float delta = 2;
 }
 
-// https://cloud.google.com/apis/design/standard_methods
 // Interest calculation service
+// can be like regular method CalculateInterest - does not have to be resource oriented
+// or CreateInterest -- more resource oriented style https://cloud.google.com/apis/design/standard_methods
+// Keeping it more like resource oriented
 service InterestCalService {
   rpc CreateInterest(CreateInterestRequest) returns (CreateInterestResponse);
 }
