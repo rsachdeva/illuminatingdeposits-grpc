@@ -33,16 +33,18 @@ message Bank {
   float delta = 3;
 }
 
-message ListInterestCalRequest {
+message CreateInterestRequest {
   repeated NewBank new_banks = 1;
 }
 
-message ListInterestCalResponse {
+message CreateInterestResponse {
   repeated Bank banks = 1;
 
   float delta = 2;
 }
 
+// https://cloud.google.com/apis/design/standard_methods
+// Interest calculation service
 service InterestCalService {
-  rpc ListInterestCal(ListInterestCalRequest) returns (ListInterestCalResponse);
+  rpc CreateInterest(CreateInterestRequest) returns (CreateInterestResponse);
 }
