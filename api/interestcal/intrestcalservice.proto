@@ -3,6 +3,46 @@ syntax = "proto3";
 package interestcal;
 option go_package = ".;interestcalpb";
 
-service InterestCalService {
+message NewDeposit  {
+  string account = 1;
+  string account_type = 2;
+  float apy = 3 ;
+  float years = 4 ;
+  float amount = 5;
+  float delta = 6;
+}
 
+message Deposit  {
+  string account = 1;
+  string account_type = 2;
+  float apy = 3 ;
+  float years = 4 ;
+  float amount = 5;
+  float delta = 6;
+}
+
+message NewBank {
+  string name = 1;
+  repeated NewDeposit new_deposits = 2;
+}
+
+message Bank {
+  string name = 1;
+  repeated Deposit deposits = 2;
+
+  float delta = 3;
+}
+
+message ListInterestCalRequest {
+  repeated NewBank new_banks = 1;
+}
+
+message ListInterestCalResponse {
+  repeated Bank banks = 1;
+
+  float delta = 2;
+}
+
+service InterestCalService {
+  rpc ListInterestCal(ListInterestCalRequest) returns (ListInterestCalResponse);
 }
