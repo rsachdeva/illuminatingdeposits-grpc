@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/interestcalpb"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestvalue"
 )
 
 
@@ -12,10 +13,10 @@ type ServiceServer struct {
 	interestcalpb.UnimplementedInterestCalServiceServer
 }
 
-func (ServiceServer) CreateInterest(ctx context.Context, req *interestcalpb.CreateInterestRequest) (*interestcalpb.CreateInterestResponse, error) {
-	resp := interestcalpb.CreateInterestResponse{
-		Banks: nil,
-		Delta: 0,
+func (ServiceServer) CreateInterest(ctx context.Context, cireq *interestcalpb.CreateInterestRequest) (*interestcalpb.CreateInterestResponse, error) {
+	resp, err := interestvalue.CalculateDelta(cireq)
+	if err != nil {
+		return nil, err
 	}
-	return &resp, nil
+	return resp, nil
 }
