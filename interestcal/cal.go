@@ -1,6 +1,6 @@
 // Calculations
 
-package interestvalue
+package interestcal
 
 import (
 	"fmt"

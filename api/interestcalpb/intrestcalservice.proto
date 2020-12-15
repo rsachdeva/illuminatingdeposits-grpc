@@ -9,7 +9,6 @@ message NewDeposit  {
   double apy = 3 ;
   double years = 4 ;
   double amount = 5;
-  double delta = 6;
 }
 
 message Deposit  {

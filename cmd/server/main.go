@@ -10,10 +10,14 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	address = "localhost:50051"
+)
+
 func main() {
 	fmt.Println("Starting ServiceServer...")
 
-	lis, err := net.Listen("tcp", "0.0.0.0:50051")
+	lis, err := net.Listen("tcp", address)
 	if err != nil {
 		log.Fatalf("could not listen %v", err)
 	}
