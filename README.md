@@ -29,4 +29,4 @@ go mod tidy
 ```
 
 # Version
-v0.7
+v0.75

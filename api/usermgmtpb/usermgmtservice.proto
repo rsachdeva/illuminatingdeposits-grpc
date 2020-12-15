@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package usermgmtpb;
+option go_package = ".;usermgmtpb";
+
+// User Management service
+// can be like regular method AddUser - does not have to be resource oriented
+// or CreateUser -- more resource oriented style https://cloud.google.com/apis/design/standard_methods
+// Keeping it more like resource oriented
+
+// User represents someone with access to our system.
+//    type User struct {
+//ID           string         `db:"user_id" json:"id"`
+//Name         string         `db:"name" json:"name"`
+//Email        string         `db:"email" json:"email"`
+//Roles        pq.StringArray `db:"roles" json:"roles"`
+//    PasswordHash []byte         `db:"password_hash" json:"-"`
+//    DateCreated  time.Time      `db:"date_created" json:"date_created"`
+//    DateUpdated  time.Time      `db:"date_updated" json:"date_updated"`
+//    }
+
+
+message CreateUserRequest {
+
+}
+
+message CreateUserResponse {
+  string name = 1;
+  string email = 2;
+  repeated string roles = 3;
+
+}
+
+service UserMgmtService {
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+}
