@@ -6,17 +6,12 @@ import (
 	"net"
 
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/interestcalpb"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal"
 	"google.golang.org/grpc"
 )
 
-// server is used to implement ??.
-type server struct {
-	interestcalpb.UnimplementedInterestCalServiceServer
-}
-
-
 func main() {
-	fmt.Println("Starting server...")
+	fmt.Println("Starting ServiceServer...")
 
 	lis, err := net.Listen("tcp", "0.0.0.0:50051")
 	if err != nil {
@@ -24,7 +19,7 @@ func main() {
 	}
 	s := grpc.NewServer()
 	fmt.Println("Registering InterestCalService...")
-	interestcalpb.RegisterInterestCalServiceServer(s, &server{})
+	interestcalpb.RegisterInterestCalServiceServer(s, interestcal.ServiceServer{})
 
 	fmt.Println("Ready to serve now")
 	if err := s.Serve(lis); err != nil {

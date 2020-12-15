@@ -6,19 +6,19 @@ option go_package = ".;interestcalpb";
 message NewDeposit  {
   string account = 1;
   string account_type = 2;
-  float apy = 3 ;
-  float years = 4 ;
-  float amount = 5;
-  float delta = 6;
+  double apy = 3 ;
+  double years = 4 ;
+  double amount = 5;
+  double delta = 6;
 }
 
 message Deposit  {
   string account = 1;
   string account_type = 2;
-  float apy = 3 ;
-  float years = 4 ;
-  float amount = 5;
-  float delta = 6;
+  double apy = 3 ;
+  double years = 4 ;
+  double amount = 5;
+  double delta = 6;
 }
 
 message NewBank {
@@ -30,7 +30,7 @@ message Bank {
   string name = 1;
   repeated Deposit deposits = 2;
 
-  float delta = 3;
+  double delta = 3;
 }
 
 message CreateInterestRequest {
@@ -40,7 +40,7 @@ message CreateInterestRequest {
 message CreateInterestResponse {
   repeated Bank banks = 1;
 
-  float delta = 2;
+  double delta = 2;
 }
 
 // Interest calculation service
