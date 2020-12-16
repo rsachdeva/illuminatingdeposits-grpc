@@ -28,5 +28,12 @@ run generateinterestcalservice.sh
 go mod tidy  
 ```
 
+### To start only external db and trace service for working with Editor/IDE:
+Execute:
+```shell
+export COMPOSE_IGNORE_ORPHANS=True && \
+docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up --build
+```
+
 # Version
 v0.85
