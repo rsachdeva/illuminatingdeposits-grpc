@@ -18,7 +18,8 @@ const (
 
 func main() {
 	fmt.Println("Starting ServiceServer...")
-
+	ctx, mt := connectMongoDB()
+	mdb := mt.Database("depositsmongodb")
 	lis, err := net.Listen("tcp", address)
 	if err != nil {
 		log.Fatalf("could not listen %v", err)
@@ -26,10 +27,10 @@ func main() {
 	s := grpc.NewServer()
 	fmt.Println("Registering InterestCalService...")
 	interestcalpb.RegisterInterestCalServiceServer(s, interestcal.ServiceServer{})
-	usermgmtpb.RegisterUserMgmtServiceServer(s, usermgmt.ServiceServer{})
+	fmt.Println("Registering UserMgmtService...")
+	usermgmtpb.RegisterUserMgmtServiceServer(s, usermgmt.ServiceServer{
+		Mdb: mdb,
+	})
 
-	fmt.Println("Ready to serve now")
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("error is %#v", err)
-	}
+	serveWithShutdown(s, lis, mt, ctx)
 }

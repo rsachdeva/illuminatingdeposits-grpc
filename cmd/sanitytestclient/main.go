@@ -27,8 +27,8 @@ func withoutTlsRequestCreateUser() {
 
 	req := usermgmtpb.CreateUserRequest{
 		NewUser: &usermgmtpb.NewUser{
-			Name:            "Rob Pike",
-			Email:           "growth-a@drinnovations.us",
+			Name:            "Rohit-Sachdeva-Admin",
+			Email:           "growth@drinnovations.us",
 			Roles:           []string{"Admin"},
 			Password:        "kubernetes",
 			PasswordConfirm: "kubernetes",

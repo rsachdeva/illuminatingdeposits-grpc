@@ -5,10 +5,12 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/usermgmtpb"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type ServiceServer struct {
 	usermgmtpb.UnimplementedUserMgmtServiceServer
+	Mdb *mongo.Database
 }
 
 func (ServiceServer) CreateUser(ctx context.Context, req *usermgmtpb.CreateUserRequest) (*usermgmtpb.CreateUserResponse, error) {
