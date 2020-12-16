@@ -34,6 +34,11 @@ Execute:
 export COMPOSE_IGNORE_ORPHANS=True && \
 docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up --build
 ```
+And only once run for index setup:
+```shell
+go run ./tools/dbindexescli
+```
+
 
 ### Troubleshooting
 If for any reason no connection is happening from client to server or client hangs or server start up issues:

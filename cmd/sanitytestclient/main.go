@@ -39,7 +39,7 @@ func withoutTlsRequestCreateUser() {
 
 	umresp, err := uMgmtSvcClient.CreateUser(context.Background(), &req)
 	if err != nil {
-		log.Fatal("error calling CreateUser service", err)
+		log.Println("error calling CreateUser service", err)
 	}
 	log.Printf("ciresp is %+v", umresp)
 
@@ -123,7 +123,7 @@ func withoutTlsRequestCreateInterest() {
 	// endpoint CreateInterest method in InterestCalculationService
 	ciresp, err := iCalSvcClient.CreateInterest(context.Background(), &req)
 	if err != nil {
-		log.Fatal("error calling CreateInterest service", err)
+		log.Println("error calling CreateInterest service", err)
 	}
 	log.Printf("\nciresp is %+v", ciresp)
 }

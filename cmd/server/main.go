@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
+	"time"
 
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/interestcalpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/usermgmtpb"
@@ -19,7 +21,9 @@ const (
 func main() {
 	log.SetFlags(log.LstdFlags | log.Ltime | log.Lshortfile)
 	log.Println("Starting ServiceServer...")
-	ctx, mt := mongodbconn.ConnectMongoDB()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	mt := mongodbconn.ConnectMongoDB(ctx)
 	mdb := mt.Database("depositsmongodb")
 	lis, err := net.Listen("tcp", address)
 	if err != nil {
@@ -33,5 +37,5 @@ func main() {
 		Mdb: mdb,
 	})
 
-	serveWithShutdown(s, lis, mt, ctx)
+	serveWithShutdown(ctx, s, lis, mt)
 }

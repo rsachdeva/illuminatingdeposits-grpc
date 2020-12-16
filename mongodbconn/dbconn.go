@@ -4,17 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func ConnectMongoDB() (context.Context, *mongo.Client) {
+func ConnectMongoDB(ctx context.Context) *mongo.Client {
 	uri := "mongodb://localhost:27017"
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
 	// connect to MongoDB
 	mt, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
@@ -26,10 +23,10 @@ func ConnectMongoDB() (context.Context, *mongo.Client) {
 		panic(err)
 	}
 	fmt.Println("Successfully connected mongodb and pinged.")
-	return ctx, mt
+	return mt
 }
 
-func DisconnectMongodb(mt *mongo.Client, ctx context.Context) {
+func DisconnectMongodb(ctx context.Context, mt *mongo.Client) {
 	log.Println("disconnecting from mongodb")
 	fmt.Println("Closing MongoDB Connection...")
 	if err := mt.Disconnect(ctx); err != nil {

@@ -49,19 +49,6 @@ func addUser(ctx context.Context, mdb *mongo.Database, cureq *usermgmtpb.CreateU
 	}
 
 	coll := mdb.Collection("user")
-	/**
-	res, err := svr.collection.InsertOne(ctx, bi)
-	if err != nil {
-		// Unary - SquareRoot method for CalculatorService server.go:133
-		return nil, status.Errorf(codes.Internal, fmt.Sprintf("Internal error: %v", err))
-	}
-	log.Printf("CreateBlog res is %v", res)
-
-	oid, ok := res.InsertedID.(primitive.ObjectID)
-	if !ok {
-		return nil, status.Errorf(codes.Internal, "Internal Eror: Cannot convert to OID")
-	}
-	*/
 
 	res, err := coll.InsertOne(ctx, &u)
 	if err != nil {

@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func serveWithShutdown(s *grpc.Server, lis net.Listener, mt *mongo.Client, ctx context.Context) {
+func serveWithShutdown(ctx context.Context, s *grpc.Server, lis net.Listener, mt *mongo.Client) {
 	// Start the service listening for requests.
 	log.Println("Ready to Serve now; Press Ctrl+C for Graceful shutdown")
 	go func() {
@@ -24,11 +24,11 @@ func serveWithShutdown(s *grpc.Server, lis net.Listener, mt *mongo.Client, ctx c
 	shutdownCh := make(chan os.Signal, 1)
 	signal.Notify(shutdownCh, os.Interrupt)
 	<-shutdownCh
-	quitGracefully(s, lis, mt, ctx)
+	quitGracefully(ctx, s, lis, mt)
 }
 
-func quitGracefully(s *grpc.Server, lis net.Listener, mt *mongo.Client, ctx context.Context) {
-	mongodbconn.DisconnectMongodb(mt, ctx)
+func quitGracefully(ctx context.Context, s *grpc.Server, lis net.Listener, mt *mongo.Client) {
+	mongodbconn.DisconnectMongodb(ctx, mt)
 	log.Println("Stopping the server...")
 	s.Stop()
 	log.Println("Closing the listener...")
