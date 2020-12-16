@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc"
 )
@@ -27,7 +28,7 @@ func serveWithShutdown(s *grpc.Server, lis net.Listener, mt *mongo.Client, ctx c
 }
 
 func quitGracefully(s *grpc.Server, lis net.Listener, mt *mongo.Client, ctx context.Context) {
-	disconnectMongodb(mt, ctx)
+	mongodbconn.DisconnectMongodb(mt, ctx)
 	log.Println("Stopping the server...")
 	s.Stop()
 	log.Println("Closing the listener...")

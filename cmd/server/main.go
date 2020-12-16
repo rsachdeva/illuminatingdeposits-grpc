@@ -7,6 +7,7 @@ import (
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/interestcalpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/usermgmtpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt"
 	"google.golang.org/grpc"
 )
@@ -18,7 +19,7 @@ const (
 func main() {
 	log.SetFlags(log.LstdFlags | log.Ltime | log.Lshortfile)
 	log.Println("Starting ServiceServer...")
-	ctx, mt := connectMongoDB()
+	ctx, mt := mongodbconn.ConnectMongoDB()
 	mdb := mt.Database("depositsmongodb")
 	lis, err := net.Listen("tcp", address)
 	if err != nil {

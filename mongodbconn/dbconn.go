@@ -1,4 +1,4 @@
-package main
+package mongodbconn
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func connectMongoDB() (context.Context, *mongo.Client) {
+func ConnectMongoDB() (context.Context, *mongo.Client) {
 	uri := "mongodb://localhost:27017"
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -29,7 +29,7 @@ func connectMongoDB() (context.Context, *mongo.Client) {
 	return ctx, mt
 }
 
-func disconnectMongodb(mt *mongo.Client, ctx context.Context) {
+func DisconnectMongodb(mt *mongo.Client, ctx context.Context) {
 	log.Println("disconnecting from mongodb")
 	fmt.Println("Closing MongoDB Connection...")
 	if err := mt.Disconnect(ctx); err != nil {
