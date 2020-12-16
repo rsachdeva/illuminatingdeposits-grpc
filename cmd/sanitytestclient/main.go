@@ -25,7 +25,17 @@ func withoutTlsRequestCreateUser() {
 	uMgmtSvcClient := usermgmtpb.NewUserMgmtServiceClient(conn)
 	fmt.Printf("uMgmtSvcClient client created")
 
-	umresp, err := uMgmtSvcClient.CreateUser(context.Background(), &usermgmtpb.CreateUserRequest{})
+	req := usermgmtpb.CreateUserRequest{
+		NewUser: &usermgmtpb.NewUser{
+			Name:            "Rob Pike",
+			Email:           "growth-a@drinnovations.us",
+			Roles:           []string{"Admin"},
+			Password:        "kubernetes",
+			PasswordConfirm: "kubernetes",
+		},
+	}
+
+	umresp, err := uMgmtSvcClient.CreateUser(context.Background(), &req)
 	if err != nil {
 		log.Fatal("error calling CreateUser service", err)
 	}

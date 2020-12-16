@@ -22,8 +22,12 @@ option go_package = ".;usermgmtpb";
 //    }
 
 
-message CreateUserRequest {
-
+message NewUser {
+  string name = 1;
+  string email = 2;
+  repeated string roles = 3;
+  string password = 4;
+  string password_confirm = 5;
 }
 
 message User {
@@ -33,6 +37,10 @@ message User {
   repeated string roles = 4;
   google.protobuf.Timestamp date_created = 5;
   google.protobuf.Timestamp date_updated = 6;
+}
+
+message CreateUserRequest {
+   NewUser new_user = 1;
 }
 
 message CreateUserResponse {

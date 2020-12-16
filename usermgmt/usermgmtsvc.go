@@ -11,17 +11,17 @@ type ServiceServer struct {
 	usermgmtpb.UnimplementedUserMgmtServiceServer
 }
 
-func (ServiceServer) CreateUser(context.Context, *usermgmtpb.CreateUserRequest) (*usermgmtpb.CreateUserResponse, error) {
-	u := usermgmtpb.User{
-		Id:          "xjajs",
-		Name:        "",
-		Email:       "someone3-ajmd@drinnovations.us",
-		Roles:       []string{"USER"},
-		DateCreated: ptypes.TimestampNow(),
-		DateUpdated: ptypes.TimestampNow(),
-	}
+func (ServiceServer) CreateUser(ctx context.Context, req *usermgmtpb.CreateUserRequest) (*usermgmtpb.CreateUserResponse, error) {
+	u := req.NewUser
 	resp := usermgmtpb.CreateUserResponse{
-		User: &u,
+		User: &usermgmtpb.User{
+			Id:          "random-uuid-jmd",
+			Name:        u.Name,
+			Email:       u.Email,
+			Roles:       u.Roles,
+			DateCreated: ptypes.TimestampNow(),
+			DateUpdated: ptypes.TimestampNow(),
+		},
 	}
 	return &resp, nil
 }
