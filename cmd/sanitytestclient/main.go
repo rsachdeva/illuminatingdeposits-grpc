@@ -25,7 +25,7 @@ func withoutTlsRequestCreateUser() {
 
 	fmt.Println("calling NewUserMgmtServiceClient(conn)")
 	uMgmtSvcClient := usermgmtpb.NewUserMgmtServiceClient(conn)
-	fmt.Printf("uMgmtSvcClient client created")
+	fmt.Println("uMgmtSvcClient client created")
 
 	req := usermgmtpb.CreateUserRequest{
 		NewUser: &usermgmtpb.NewUser{
@@ -46,7 +46,7 @@ func withoutTlsRequestCreateUser() {
 }
 
 func withoutTlsRequestCreateInterest() {
-	fmt.Printf("starting withoutTlsRequestCreateInterest")
+	fmt.Println("starting withoutTlsRequestCreateInterest")
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
@@ -125,7 +125,7 @@ func withoutTlsRequestCreateInterest() {
 	if err != nil {
 		log.Fatal("error calling CreateInterest service", err)
 	}
-	log.Printf("ciresp is %+v", ciresp)
+	log.Printf("\nciresp is %+v", ciresp)
 }
 
 func main() {

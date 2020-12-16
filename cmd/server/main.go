@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 
@@ -17,7 +16,8 @@ const (
 )
 
 func main() {
-	fmt.Println("Starting ServiceServer...")
+	log.SetFlags(log.LstdFlags | log.Ltime | log.Lshortfile)
+	log.Println("Starting ServiceServer...")
 	ctx, mt := connectMongoDB()
 	mdb := mt.Database("depositsmongodb")
 	lis, err := net.Listen("tcp", address)
@@ -25,9 +25,9 @@ func main() {
 		log.Fatalf("could not listen %v", err)
 	}
 	s := grpc.NewServer()
-	fmt.Println("Registering InterestCalService...")
+	log.Println("Registering InterestCalService...")
 	interestcalpb.RegisterInterestCalServiceServer(s, interestcal.ServiceServer{})
-	fmt.Println("Registering UserMgmtService...")
+	log.Println("Registering UserMgmtService...")
 	usermgmtpb.RegisterUserMgmtServiceServer(s, usermgmt.ServiceServer{
 		Mdb: mdb,
 	})
