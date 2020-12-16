@@ -35,5 +35,17 @@ export COMPOSE_IGNORE_ORPHANS=True && \
 docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up --build
 ```
 
+### Troubleshooting
+If for any reason no connection is happening from client to server or client hangs or server start up issues:
+Run 
+```
+ps aux | grep "go run" 
+```
+or
+```
+ps aux | grep "go_build" 
+```
+to confirm is something else is already running
+
 # Version
 v0.85
