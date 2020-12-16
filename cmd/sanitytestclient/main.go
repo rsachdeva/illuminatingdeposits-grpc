@@ -11,17 +11,19 @@ import (
 )
 
 const (
-	address = "localhost:50051"
+	address = "localhost:50052"
 )
 
 func withoutTlsRequestCreateUser() {
 	// Set up a connection to the server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	fmt.Println("starting withoutTlsRequestCreateUser")
+	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
 
+	fmt.Println("calling NewUserMgmtServiceClient(conn)")
 	uMgmtSvcClient := usermgmtpb.NewUserMgmtServiceClient(conn)
 	fmt.Printf("uMgmtSvcClient client created")
 
@@ -44,6 +46,7 @@ func withoutTlsRequestCreateUser() {
 }
 
 func withoutTlsRequestCreateInterest() {
+	fmt.Printf("starting withoutTlsRequestCreateInterest")
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {

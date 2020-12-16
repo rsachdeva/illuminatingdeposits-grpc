@@ -13,6 +13,14 @@ type ServiceServer struct {
 	Mdb *mongo.Database
 }
 
+// func (svc ServiceServer) CreateUser(ctx context.Context, cureq *usermgmtpb.CreateUserRequest) (*usermgmtpb.CreateUserResponse, error) {
+// 	resp, err := addUser(ctx, svc.Mdb, cureq)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return resp, nil
+// }
+
 func (ServiceServer) CreateUser(ctx context.Context, req *usermgmtpb.CreateUserRequest) (*usermgmtpb.CreateUserResponse, error) {
 	u := req.NewUser
 	resp := usermgmtpb.CreateUserResponse{
