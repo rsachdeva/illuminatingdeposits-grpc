@@ -6,7 +6,9 @@ import (
 	"net"
 
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/interestcalpb"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/api/usermgmtpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt"
 	"google.golang.org/grpc"
 )
 
@@ -24,6 +26,7 @@ func main() {
 	s := grpc.NewServer()
 	fmt.Println("Registering InterestCalService...")
 	interestcalpb.RegisterInterestCalServiceServer(s, interestcal.ServiceServer{})
+	usermgmtpb.RegisterUserMgmtServiceServer(s, usermgmt.ServiceServer{})
 
 	fmt.Println("Ready to serve now")
 	if err := s.Serve(lis); err != nil {
