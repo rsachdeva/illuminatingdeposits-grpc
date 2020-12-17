@@ -32,7 +32,7 @@ go mod tidy
 Execute:
 ```shell
 export COMPOSE_IGNORE_ORPHANS=True && \
-docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up --build
+docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up
 ```
 And only once run for index setup:
 ```shell
@@ -53,4 +53,4 @@ ps aux | grep "go_build"
 to confirm is something else is already running
 
 # Version
-v0.92
+v0.93

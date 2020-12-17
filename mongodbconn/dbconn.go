@@ -4,16 +4,18 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func ConnectMongoDB(ctx context.Context) *mongo.Client {
+func ConnectMongoDB(ctx context.Context, timeoutSec int) *mongo.Client {
 	uri := "mongodb://localhost:27017"
 	// connect to MongoDB
-	mt, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	// ClientOptions.SetServerSelectionTimeout
+	mt, err := mongo.Connect(ctx, options.Client().ApplyURI(uri).SetServerSelectionTimeout(time.Duration(timeoutSec)*time.Second))
 	if err != nil {
 		log.Fatal(err)
 	}

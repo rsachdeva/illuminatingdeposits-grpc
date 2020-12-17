@@ -7,9 +7,11 @@ import (
 	"time"
 
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/interestcalpb"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/api/mongodbhealthpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/usermgmtpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt"
 	"google.golang.org/grpc"
 )
@@ -23,19 +25,23 @@ func main() {
 	log.Println("Starting ServiceServer...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	mt := mongodbconn.ConnectMongoDB(ctx)
+	mt := mongodbconn.ConnectMongoDB(ctx, 10)
 	mdb := mt.Database("depositsmongodb")
 	lis, err := net.Listen("tcp", address)
 	if err != nil {
 		log.Fatalf("could not listen %v", err)
 	}
 	s := grpc.NewServer()
-	log.Println("Registering InterestCalService...")
-	interestcalpb.RegisterInterestCalServiceServer(s, interestcal.ServiceServer{})
+	log.Println("Registering MongoDBHealthService...")
+	mongodbhealthpb.RegisterMongoDbHealthServiceServer(s, mongodbhealth.ServiceServer{
+		Mct: mongodbconn.ConnectMongoDB(ctx, 2),
+	})
 	log.Println("Registering UserMgmtService...")
 	usermgmtpb.RegisterUserMgmtServiceServer(s, usermgmt.ServiceServer{
 		Mdb: mdb,
 	})
+	log.Println("Registering InterestCalService...")
+	interestcalpb.RegisterInterestCalServiceServer(s, interestcal.ServiceServer{})
 
 	serveWithShutdown(ctx, s, lis, mt)
 }

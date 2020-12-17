@@ -6,13 +6,33 @@ import (
 	"log"
 
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/interestcalpb"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/api/mongodbhealthpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/usermgmtpb"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 const (
 	address = "localhost:50052"
 )
+
+func withoutTlsGetRequestMongoDbHealth() {
+	fmt.Println("starting withoutTLSGetRequestMongoDbHealth()")
+	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+
+	fmt.Println("calling NewMongoDbHealthServiceClient(conn)")
+	mdbSvcClient := mongodbhealthpb.NewMongoDbHealthServiceClient(conn)
+	fmt.Println("mdbSvcClient client created")
+	mdbresp, err := mdbSvcClient.GetMongoDBHealth(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		log.Println("error calling MongoDBHealth service", err)
+	}
+	log.Printf("mdbresp is %+v", mdbresp)
+}
 
 func withoutTlsRequestCreateUser() {
 	// Set up a connection to the server.
@@ -30,7 +50,7 @@ func withoutTlsRequestCreateUser() {
 	req := usermgmtpb.CreateUserRequest{
 		NewUser: &usermgmtpb.NewUser{
 			Name:            "Rohit-Sachdeva-Admin",
-			Email:           "growth@drinnovations.us",
+			Email:           "growth-c@drinnovations.us",
 			Roles:           []string{"Admin"},
 			Password:        "kubernetes",
 			PasswordConfirm: "kubernetes",
@@ -129,6 +149,7 @@ func withoutTlsRequestCreateInterest() {
 }
 
 func main() {
+	withoutTlsGetRequestMongoDbHealth()
 	withoutTlsRequestCreateUser()
 	withoutTlsRequestCreateInterest()
 }
