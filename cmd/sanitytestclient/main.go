@@ -46,6 +46,7 @@ func withoutTlsGetRequestMongoDbHealth() {
 }
 
 func tlsGetRequestMongoDBHealth() {
+	fmt.Println("starting tlsGetRequestMongoDBHealth")
 	opts := tlsOpts()
 	conn, err := grpc.Dial(address, opts)
 	if err != nil {
@@ -60,6 +61,38 @@ func tlsGetRequestMongoDBHealth() {
 		log.Println("error calling MongoDBHealth service", err)
 	}
 	log.Printf("mdbresp is %+v", mdbresp)
+}
+
+func tlsRequestCreateUser() {
+	// Set up a connection to the server.
+	fmt.Println("starting tlsRequestCreateUser")
+	opts := tlsOpts()
+	conn, err := grpc.Dial(address, opts)
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+
+	fmt.Println("calling NewUserMgmtServiceClient(conn)")
+	uMgmtSvcClient := usermgmtpb.NewUserMgmtServiceClient(conn)
+	fmt.Println("uMgmtSvcClient client created")
+
+	req := usermgmtpb.CreateUserRequest{
+		NewUser: &usermgmtpb.NewUser{
+			Name:            "Rohit-Sachdeva-User",
+			Email:           "growth-h@drinnovations.us",
+			Roles:           []string{"User"},
+			Password:        "kubernetes",
+			PasswordConfirm: "kubernetes",
+		},
+	}
+
+	umresp, err := uMgmtSvcClient.CreateUser(context.Background(), &req)
+	if err != nil {
+		log.Println("error calling CreateUser service", err)
+	}
+	log.Printf("ciresp is %+v", umresp)
+
 }
 
 func withoutTlsRequestCreateUser() {
@@ -182,4 +215,5 @@ func main() {
 	// withoutTlsRequestCreateInterest()
 
 	tlsGetRequestMongoDBHealth()
+	tlsRequestCreateUser()
 }
