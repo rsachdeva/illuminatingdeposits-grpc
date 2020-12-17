@@ -37,6 +37,25 @@ And only once run for index setup:
 go run ./tools/dbindexescli
 ```
 
+# TLS files
+```shell
+docker build -t tlscert:v0.1 -f ./build/Dockerfile.openssl . && \
+docker run -v $PWD/conf/tls:/tls tlscert:v0.1
+``` 
+
+To see openssl version being used in Docker:
+```shell
+docker build -t tlscert:v0.1 -f ./build/Dockerfile.openssl . && \
+docker run -ti -v $PWD/conf/tls:/tls tlscert:v0.1 sh
+```
+
+You get a prompt
+/tls 
+
+And enter version check
+```shell
+openssl version
+```
 
 ### Troubleshooting
 If for any reason no connection is happening from client to server or client hangs or server start up issues:
@@ -51,4 +70,4 @@ ps aux | grep "go_build"
 to confirm is something else is already running
 
 # Version
-v0.94
+v0.95
