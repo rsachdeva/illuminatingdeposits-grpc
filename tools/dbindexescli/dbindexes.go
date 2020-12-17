@@ -14,7 +14,7 @@ import (
 func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	mt := mongodbconn.ConnectMongoDB(ctx)
+	mt := mongodbconn.ConnectMongoDB(ctx, 10)
 	mdb := mt.Database("depositsmongodb")
 	coll := mdb.Collection("user")
 

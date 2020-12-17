@@ -1,6 +1,6 @@
 # Illuminating Deposits - gRPC
 
-# gRPC pre setup 
+# gRPC pre setup  (in case desired to generate already included protobuf code)
 
 ```
 brew install protobuf
@@ -11,7 +11,13 @@ export GO111MODULE=on
 go get google.golang.org/protobuf/cmd/protoc-gen-go google.golang.org/grpc/cmd/protoc-gen-go-grpc 
 ```
 
-Now go to this project root directory.
+Now go to this project root directory and run following scripts for generating protobuf related code for the services:
+```
+generateinterestcalservice.sh
+generatemongodbhealthservice.sh
+generateusermgmtservice.sh 
+```
+
 
 # All commands should be executed from the root directory (illuminatingdeposits-grpc) of the project
 (Development is WIP)
@@ -19,14 +25,6 @@ Now go to this project root directory.
 <p align="center">
 <img src="./logo.png" alt="Illuminating Deposits Project Logo" title="Illuminating Deposits Project Logo" />
 </p>
-
-# gRPC API using protobuf for Messages
-
-Proto file exists in api folder; accordingly run the following to generate grpc code for the service
-```
-run generateinterestcalservice.sh
-go mod tidy  
-```
 
 ### To start only external db and trace service for working with Editor/IDE:
 Execute:
@@ -53,4 +51,4 @@ ps aux | grep "go_build"
 to confirm is something else is already running
 
 # Version
-v0.93
+v0.94
