@@ -9,12 +9,23 @@ import (
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/mongodbhealthpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/usermgmtpb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 const (
 	address = "localhost:50052"
 )
+
+func tlsOpts() grpc.DialOption {
+	certFile := "conf/tls/cacrtto.pem"
+	creds, err := credentials.NewClientTLSFromFile(certFile, "")
+	if err != nil {
+		log.Fatalf("loading certificate error is %v", err)
+	}
+	opts := grpc.WithTransportCredentials(creds)
+	return opts
+}
 
 func withoutTlsGetRequestMongoDbHealth() {
 	fmt.Println("starting withoutTLSGetRequestMongoDbHealth()")
@@ -24,6 +35,23 @@ func withoutTlsGetRequestMongoDbHealth() {
 	}
 	defer conn.Close()
 
+	fmt.Println("calling NewMongoDbHealthServiceClient(conn)")
+	mdbSvcClient := mongodbhealthpb.NewMongoDbHealthServiceClient(conn)
+	fmt.Println("mdbSvcClient client created")
+	mdbresp, err := mdbSvcClient.GetMongoDBHealth(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		log.Println("error calling MongoDBHealth service", err)
+	}
+	log.Printf("mdbresp is %+v", mdbresp)
+}
+
+func tlsGetRequestMongoDBHealth() {
+	opts := tlsOpts()
+	conn, err := grpc.Dial(address, opts)
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
 	fmt.Println("calling NewMongoDbHealthServiceClient(conn)")
 	mdbSvcClient := mongodbhealthpb.NewMongoDbHealthServiceClient(conn)
 	fmt.Println("mdbSvcClient client created")
@@ -149,7 +177,9 @@ func withoutTlsRequestCreateInterest() {
 }
 
 func main() {
-	withoutTlsGetRequestMongoDbHealth()
-	withoutTlsRequestCreateUser()
-	withoutTlsRequestCreateInterest()
+	// withoutTlsGetRequestMongoDbHealth()
+	// withoutTlsRequestCreateUser()
+	// withoutTlsRequestCreateInterest()
+
+	tlsGetRequestMongoDBHealth()
 }

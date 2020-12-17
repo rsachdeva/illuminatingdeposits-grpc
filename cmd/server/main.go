@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"time"
@@ -31,7 +32,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not listen %v", err)
 	}
-	s := grpc.NewServer()
+
+	tls := true
+	fmt.Println("tls option is ", tls)
+	var opts []grpc.ServerOption
+	if tls {
+		opts = tlsOpts(opts)
+	}
+	s := grpc.NewServer(opts...)
 	log.Println("Registering MongoDBHealthService...")
 	mongodbhealthpb.RegisterMongoDbHealthServiceServer(s, mongodbhealth.ServiceServer{
 		Mct: mongodbconn.ConnectMongoDB(ctx, 2),
