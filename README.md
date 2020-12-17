@@ -39,13 +39,13 @@ go run ./tools/dbindexescli
 
 # TLS files
 ```shell
-docker build -t tlscert:v0.1 -f ./build/Dockerfile.openssl . && \
+docker build -t tlscert:v0.1 -f ./build/Dockerfile.openssl ./conf/tls && \
 docker run -v $PWD/conf/tls:/tls tlscert:v0.1
 ``` 
 
 To see openssl version being used in Docker:
 ```shell
-docker build -t tlscert:v0.1 -f ./build/Dockerfile.openssl . && \
+docker build -t tlscert:v0.1 -f ./build/Dockerfile.openssl ./conf/tls && \
 docker run -ti -v $PWD/conf/tls:/tls tlscert:v0.1 sh
 ```
 
