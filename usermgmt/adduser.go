@@ -68,6 +68,9 @@ func addUser(ctx context.Context, mdb *mongo.Database, cureq *usermgmtpb.CreateU
 		return nil, status.Errorf(codes.Internal, "Internal Error: After inserting user, uuid of found user should match to its uuid when persisted")
 	}
 
+	// to omit password hash on client side; used only for persistence
+	u.PasswordHash = nil
+
 	curesp := usermgmtpb.CreateUserResponse{
 		User: &u,
 	}
