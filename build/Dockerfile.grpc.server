@@ -12,3 +12,4 @@ RUN apk add bash
 WORKDIR /cmd
 COPY conf/tls  ./conf/tls
 COPY --from=build /illuminatingdeposits/cmd/server/server .
+CMD ["./server"]

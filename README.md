@@ -18,8 +18,7 @@ generatemongodbhealthservice.sh
 generateusermgmtservice.sh 
 ```
 
-
-### All commands should be executed from the root directory (illuminatingdeposits-grpc) of the project
+###### All commands should be executed from the root directory (illuminatingdeposits-grpc) of the project
 (Development is WIP)
 
 <p align="center">
@@ -30,8 +29,10 @@ generateusermgmtservice.sh
 # Docker Compose Deployment
 
 # Start mongodb
+```
 export COMPOSE_IGNORE_ORPHANS=True && \
-docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up
+docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up 
+```
 
 ### Then set up mongodb indexes
 ```shell
@@ -47,6 +48,7 @@ Make sure DEPOSITS_GRPC_SERVICE_TLS=true in docker-compose.grpc.server.yml
 ```shell
 export COMPOSE_IGNORE_ORPHANS=True && \
 docker-compose -f ./deploy/compose/docker-compose.grpc.server.yml up --build
+```
 
 ### Logs of running services (in a separate terminal):
 docker-compose -f ./deploy/compose/docker-compose.grpc.server.yml logs -f --tail 1  
@@ -113,4 +115,4 @@ ps aux | grep "go_build"
 to confirm is something else is already running
 
 # Version
-v0.97
+v1.0

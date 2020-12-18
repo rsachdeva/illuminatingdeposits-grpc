@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -24,6 +25,7 @@ func serveWithShutdown(ctx context.Context, s *grpc.Server, lis net.Listener, mt
 	shutdownCh := make(chan os.Signal, 1)
 	signal.Notify(shutdownCh, os.Interrupt)
 	<-shutdownCh
+	fmt.Println("getting os interrupt")
 	quitGracefully(ctx, s, lis, mt)
 }
 

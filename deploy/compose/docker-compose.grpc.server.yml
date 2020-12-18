@@ -16,7 +16,6 @@ services:
     container_name: grpcserver
     networks:
       - deposits_shared_grpc_network
-    command: ./server
     ports:
       - 50052:50052
     environment:

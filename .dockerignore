@@ -1,0 +1,7 @@
+build/
+deploy/
+generateinterestcalservice.sh
+generatemongodbhealthservice.sh
+generateusermgmtservice.sh
+README.md
+cmd/sanitytestclient
