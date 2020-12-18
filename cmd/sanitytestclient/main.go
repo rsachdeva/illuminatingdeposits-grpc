@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	address = "localhost:50052"
+	address = "127.0.0.1:50052"
 )
 
 func tlsOption() grpc.DialOption {

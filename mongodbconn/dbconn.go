@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,7 +13,11 @@ import (
 )
 
 func ConnectMongoDB(ctx context.Context, timeoutSec int) *mongo.Client {
-	uri := "mongodb://localhost:27017"
+	uri := "mongodb://127.0.0.1:27017"
+	if host, ok := os.LookupEnv("DEPOSITS_GRPS_DB_HOST"); ok {
+		uri = fmt.Sprintf("mongodb://%v:27017", host)
+	}
+	log.Printf("mongodb uri is %v\n", uri)
 	// connect to MongoDB
 	// ClientOptions.SetServerSelectionTimeout
 	mt, err := mongo.Connect(ctx, options.Client().ApplyURI(uri).SetServerSelectionTimeout(time.Duration(timeoutSec)*time.Second))

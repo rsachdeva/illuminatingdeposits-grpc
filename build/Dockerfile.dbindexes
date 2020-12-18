@@ -1,0 +1,15 @@
+# Runs from root directory of the appserver for build context
+
+FROM golang:1.15.0-alpine AS build
+WORKDIR /illuminatingdeposits
+COPY go.mod .
+RUN go mod download
+COPY . .
+WORKDIR /illuminatingdeposits/tools/dbindexescli
+RUN go build
+
+FROM alpine
+RUN apk update
+RUN apk add bash
+WORKDIR /tools
+COPY --from=build /illuminatingdeposits/tools/dbindexescli .

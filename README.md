@@ -26,15 +26,46 @@ generateusermgmtservice.sh
 <img src="./logo.png" alt="Illuminating Deposits Project Logo" title="Illuminating Deposits Project Logo" />
 </p>
 
-### To start only external db for working with Editor/IDE:
+# gRPC API with protobuf for Messages
+# Docker Compose Deployment
+
+# Start mongodb
+export COMPOSE_IGNORE_ORPHANS=True && \
+docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up
+
+### Then set up mongodb indexes
+```shell
+export COMPOSE_IGNORE_ORPHANS=True && \
+docker-compose -f ./deploy/compose/docker-compose.dbindexes.yml up --build
+````
+
+### To start all services without TLS:
+Make sure DEPOSITS_WEB_SERVICE_SERVER_TLS=false in docker-compose.grpc.server.yml
+### To start all services with TLS:
+Make sure DEPOSITS_WEB_SERVICE_SERVER_TLS=true in docker-compose.grpc.server.yml
+### And then execute:
+```shell
+export COMPOSE_IGNORE_ORPHANS=True && \
+docker-compose -f ./deploy/compose/docker-compose.grpc.server.yml up --build
+``` 
+### Shutdown
+```shell
+docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml down
+docker-compose -f ./deploy/compose/docker-compose.grpc.server.yml down
+```
+
+### To start only external db and trace service for working with local machine Editor/IDE:
 Execute:
 ```shell
 export COMPOSE_IGNORE_ORPHANS=True && \
 docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up
 ```
-And only once run for index setup:
+And then run following:
 ```shell
-go run ./tools/dbindexescli
+export DEPOSITS_WEB_SERVICE_SERVER_TLS=true
+export DEPOSITS_GRPS_DB_HOST=127.0.0.1
+go run ./tools/dbindexescli  (only once)
+go run ./cmd/server
 ```
 
 # TLS files

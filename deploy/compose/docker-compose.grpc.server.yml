@@ -1,0 +1,24 @@
+# https://docs.docker.com/compose/compose-file
+# docker-compose up
+# docker-compose stop
+# docker-compose down
+version: '3'
+
+networks:
+  deposits_shared_grpc_network:
+    driver: bridge
+
+services:
+  depositsgrpcsvcserver:
+    build:
+      context: ../..
+      dockerfile: ./build/Dockerfile.grpc.server
+    container_name: grpcserver
+    networks:
+      - deposits_shared_grpc_network
+    command: ./server
+    ports:
+      - 50052:50052
+    environment:
+      - DEPOSITS_GRPS_DB_HOST=depositsmongodb
+      - DEPOSITS_WEB_SERVICE_SERVER_TLS=true

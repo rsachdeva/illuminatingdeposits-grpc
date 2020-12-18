@@ -10,13 +10,13 @@ networks:
 
 services:
 
-  # This starts a local Mongodb
-  depositsmongodb:
-    container_name: deposits_mongodb
+  dbindexescli:
+    build:
+      context: ../..
+      dockerfile: ./build/Dockerfile.dbindexes
     networks:
       - deposits_shared_grpc_network
-    image: mongo:4.4.2-bionic
-    ports:
-      - 27017:27017
-    volumes:
-      - ./mongo-volume:/data/db
+    command: >
+      bash -c "./dbindexescli"
+    environment:
+      - DEPOSITS_GRPS_DB_HOST=depositsmongodb

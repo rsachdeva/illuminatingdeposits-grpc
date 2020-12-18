@@ -14,7 +14,7 @@ import (
 
 func serveWithShutdown(ctx context.Context, s *grpc.Server, lis net.Listener, mt *mongo.Client) {
 	// Start the service listening for requests.
-	log.Println("Ready to Serve now; Press Ctrl+C for Graceful shutdown")
+	log.Println("Ready to Serve now")
 	go func() {
 		if err := s.Serve(lis); err != nil {
 			log.Fatalf("error is %#v", err)
