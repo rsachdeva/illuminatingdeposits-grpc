@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	address = "127.0.0.1:50052"
+	address = "localhost:50052"
 )
 
 func tlsOption() grpc.DialOption {
@@ -50,7 +50,7 @@ func requestCreateUser(conn *grpc.ClientConn) {
 	req := usermgmtpb.CreateUserRequest{
 		NewUser: &usermgmtpb.NewUser{
 			Name:            "Rohit-Sachdeva-User",
-			Email:           "growth-k@drinnovations.us",
+			Email:           "growth-l@drinnovations.us",
 			Roles:           []string{"USER"},
 			Password:        "kubernetes",
 			PasswordConfirm: "kubernetes",

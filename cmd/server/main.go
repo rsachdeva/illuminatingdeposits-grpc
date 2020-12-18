@@ -18,7 +18,8 @@ import (
 )
 
 const (
-	address = "localhost:50052"
+	// https://stackoverflow.com/questions/64093550/grpc-server-not-working-in-docker-compose
+	address = "0.0.0.0:50052"
 )
 
 func main() {

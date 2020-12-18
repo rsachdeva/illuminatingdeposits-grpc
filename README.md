@@ -47,6 +47,9 @@ Make sure DEPOSITS_WEB_SERVICE_SERVER_TLS=true in docker-compose.grpc.server.yml
 ```shell
 export COMPOSE_IGNORE_ORPHANS=True && \
 docker-compose -f ./deploy/compose/docker-compose.grpc.server.yml up --build
+
+### Logs of running services (in a separate terminal):
+docker-compose -f ./deploy/compose/docker-compose.grpc.server.yml logs -f --tail 1  
 ``` 
 ### Shutdown
 ```shell
@@ -67,6 +70,16 @@ export DEPOSITS_GRPS_DB_HOST=127.0.0.1
 go run ./tools/dbindexescli  (only once)
 go run ./cmd/server
 ```
+
+### gRPC Services Endpoints Invoked:
+
+#### Sanity test Client:
+See    
+cmd/sanitytestclient/main.go  
+In main function -- change tls setting to true or false.
+The server side main function should also be consistent with tls setting.
+Uncomment any desired function request.
+Make sure to make email unique to avoid error.
 
 # TLS files
 ```shell
