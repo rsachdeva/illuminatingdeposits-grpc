@@ -22,6 +22,9 @@ const (
 )
 
 func main() {
+	tls := true
+	fmt.Println("tls is", tls)
+
 	log.SetFlags(log.LstdFlags | log.Ltime | log.Lshortfile)
 	log.Println("Starting ServiceServer...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -33,7 +36,6 @@ func main() {
 		log.Fatalf("could not listen %v", err)
 	}
 
-	tls := true
 	fmt.Println("tls option is ", tls)
 	var opts []grpc.ServerOption
 	if tls {

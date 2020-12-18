@@ -1,6 +1,6 @@
 # Illuminating Deposits - gRPC
 
-# gRPC pre setup  (in case desired to generate already included protobuf code)
+#### gRPC pre setup  (in case desired to generate already included protobuf code)
 
 ```
 brew install protobuf
@@ -19,14 +19,14 @@ generateusermgmtservice.sh
 ```
 
 
-# All commands should be executed from the root directory (illuminatingdeposits-grpc) of the project
+### All commands should be executed from the root directory (illuminatingdeposits-grpc) of the project
 (Development is WIP)
 
 <p align="center">
 <img src="./logo.png" alt="Illuminating Deposits Project Logo" title="Illuminating Deposits Project Logo" />
 </p>
 
-### To start only external db and trace service for working with Editor/IDE:
+### To start only external db for working with Editor/IDE:
 Execute:
 ```shell
 export COMPOSE_IGNORE_ORPHANS=True && \
@@ -70,4 +70,4 @@ ps aux | grep "go_build"
 to confirm is something else is already running
 
 # Version
-v0.95
+v0.97

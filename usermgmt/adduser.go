@@ -51,6 +51,7 @@ func addUser(ctx context.Context, mdb *mongo.Database, cureq *usermgmtpb.CreateU
 	coll := mdb.Collection("user")
 
 	res, err := coll.InsertOne(ctx, &u)
+	log.Printf("user InsertOne err is %v", err)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, fmt.Sprintf("Internal error: %v", err))
 	}

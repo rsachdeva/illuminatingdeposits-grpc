@@ -17,24 +17,18 @@ const (
 	address = "localhost:50052"
 )
 
-func tlsOpts() grpc.DialOption {
+func tlsOption() grpc.DialOption {
 	certFile := "conf/tls/cacrtto.pem"
 	creds, err := credentials.NewClientTLSFromFile(certFile, "")
 	if err != nil {
 		log.Fatalf("loading certificate error is %v", err)
 	}
-	opts := grpc.WithTransportCredentials(creds)
-	return opts
+	opt := grpc.WithTransportCredentials(creds)
+	return opt
 }
 
-func withoutTlsGetRequestMongoDbHealth() {
-	fmt.Println("starting withoutTLSGetRequestMongoDbHealth()")
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-
+func requestGetMongoDBHealth(conn *grpc.ClientConn) {
+	fmt.Println("starting requestGetMongoDBHealth")
 	fmt.Println("calling NewMongoDbHealthServiceClient(conn)")
 	mdbSvcClient := mongodbhealthpb.NewMongoDbHealthServiceClient(conn)
 	fmt.Println("mdbSvcClient client created")
@@ -45,32 +39,9 @@ func withoutTlsGetRequestMongoDbHealth() {
 	log.Printf("mdbresp is %+v", mdbresp)
 }
 
-func tlsGetRequestMongoDBHealth() {
-	fmt.Println("starting tlsGetRequestMongoDBHealth")
-	opts := tlsOpts()
-	conn, err := grpc.Dial(address, opts)
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-	fmt.Println("calling NewMongoDbHealthServiceClient(conn)")
-	mdbSvcClient := mongodbhealthpb.NewMongoDbHealthServiceClient(conn)
-	fmt.Println("mdbSvcClient client created")
-	mdbresp, err := mdbSvcClient.GetMongoDBHealth(context.Background(), &emptypb.Empty{})
-	if err != nil {
-		log.Println("error calling MongoDBHealth service", err)
-	}
-	log.Printf("mdbresp is %+v", mdbresp)
-}
-
-func withoutTlsRequestCreateUser() {
+func requestCreateUser(conn *grpc.ClientConn) {
 	// Set up a connection to the server.
-	fmt.Println("starting withoutTlsRequestCreateUser")
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
+	fmt.Println("starting requestCreateUser")
 
 	fmt.Println("calling NewUserMgmtServiceClient(conn)")
 	uMgmtSvcClient := usermgmtpb.NewUserMgmtServiceClient(conn)
@@ -79,8 +50,8 @@ func withoutTlsRequestCreateUser() {
 	req := usermgmtpb.CreateUserRequest{
 		NewUser: &usermgmtpb.NewUser{
 			Name:            "Rohit-Sachdeva-User",
-			Email:           "growth-f@drinnovations.us",
-			Roles:           []string{"User"},
+			Email:           "growth-k@drinnovations.us",
+			Roles:           []string{"USER"},
 			Password:        "kubernetes",
 			PasswordConfirm: "kubernetes",
 		},
@@ -94,131 +65,8 @@ func withoutTlsRequestCreateUser() {
 
 }
 
-func tlsRequestCreateUser() {
-	// Set up a connection to the server.
-	fmt.Println("starting tlsRequestCreateUser")
-	opts := tlsOpts()
-	conn, err := grpc.Dial(address, opts)
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-
-	fmt.Println("calling NewUserMgmtServiceClient(conn)")
-	uMgmtSvcClient := usermgmtpb.NewUserMgmtServiceClient(conn)
-	fmt.Println("uMgmtSvcClient client created")
-
-	req := usermgmtpb.CreateUserRequest{
-		NewUser: &usermgmtpb.NewUser{
-			Name:            "Rohit-Sachdeva-User",
-			Email:           "growth-i@drinnovations.us",
-			Roles:           []string{"User"},
-			Password:        "kubernetes",
-			PasswordConfirm: "kubernetes",
-		},
-	}
-
-	umresp, err := uMgmtSvcClient.CreateUser(context.Background(), &req)
-	if err != nil {
-		log.Println("error calling CreateUser service", err)
-	}
-	log.Printf("ciresp is %+v", umresp)
-
-}
-
-func withoutTlsRequestCreateInterest() {
-	fmt.Println("starting withoutTlsRequestCreateInterest")
-	// Set up a connection to the server.
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-
-	iCalSvcClient := interestcalpb.NewInterestCalServiceClient(conn)
-	fmt.Printf("iCalSvcClient client created")
-
-	req := interestcalpb.CreateInterestRequest{
-		// &interestcalpb.NewBank is reduntant type
-		// []*interestcalpb.NewBank{&interestcalpb.NewBank{ changed to []*interestcalpb.NewBank{{
-		NewBanks: []*interestcalpb.NewBank{
-			{
-				Name: "HAPPIEST",
-				NewDeposits: []*interestcalpb.NewDeposit{
-					{
-						Account:     "1234",
-						AccountType: "Checking",
-						Apy:         0,
-						Years:       1,
-						Amount:      100,
-					},
-					{
-						Account:     "1256",
-						AccountType: "CD",
-						Apy:         24,
-						Years:       2,
-						Amount:      10700,
-					},
-					{
-						Account:     "1111",
-						AccountType: "CD",
-						Apy:         1.01,
-						Years:       10,
-						Amount:      27000,
-					},
-				},
-			},
-			{
-				Name: "NICE",
-				NewDeposits: []*interestcalpb.NewDeposit{
-					{
-						Account:     "1234",
-						AccountType: "Brokered CD",
-						Apy:         2.4,
-						Years:       7,
-						Amount:      10990,
-					},
-				},
-			},
-			{
-				Name: "ANGRY",
-				NewDeposits: []*interestcalpb.NewDeposit{
-					{
-						Account:     "1234",
-						AccountType: "Brokered CD",
-						Apy:         5,
-						Years:       7,
-						Amount:      10990,
-					},
-					{
-						Account:     "9898",
-						AccountType: "CD",
-						Apy:         2.22,
-						Years:       1,
-						Amount:      5500,
-					},
-				},
-			},
-		},
-	}
-	// endpoint CreateInterest method in InterestCalculationService
-	ciresp, err := iCalSvcClient.CreateInterest(context.Background(), &req)
-	if err != nil {
-		log.Println("error calling CreateInterest service", err)
-	}
-	log.Printf("\nciresp is %+v", ciresp)
-}
-
-func tlsRequestCreateInterest() {
-	fmt.Println("starting tlsRequestCreateInterest")
-	// Set up a connection to the server.
-	opts := tlsOpts()
-	conn, err := grpc.Dial(address, opts)
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-
+func requestCreateInterest(conn *grpc.ClientConn) {
+	fmt.Println("starting requestCreateInterest")
 	iCalSvcClient := interestcalpb.NewInterestCalServiceClient(conn)
 	fmt.Printf("iCalSvcClient client created")
 
@@ -294,11 +142,21 @@ func tlsRequestCreateInterest() {
 }
 
 func main() {
-	// withoutTlsGetRequestMongoDbHealth()
-	// withoutTlsRequestCreateUser()
-	// withoutTlsRequestCreateInterest()
+	tls := true
+	fmt.Println("tls is", tls)
+	opts := []grpc.DialOption{grpc.WithInsecure()}
+	if tls {
+		opts = []grpc.DialOption{tlsOption()}
+	}
 
-	tlsGetRequestMongoDBHealth()
-	tlsRequestCreateUser()
-	tlsRequestCreateInterest()
+	conn, err := grpc.Dial(address, opts...)
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+
+	requestGetMongoDBHealth(conn)
+	requestCreateUser(conn)
+	requestCreateInterest(conn)
+
 }
