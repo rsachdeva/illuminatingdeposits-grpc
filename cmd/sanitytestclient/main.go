@@ -8,6 +8,7 @@ import (
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/interestcalpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/mongodbhealthpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/api/usermgmtpb"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/readenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -142,7 +143,7 @@ func requestCreateInterest(conn *grpc.ClientConn) {
 }
 
 func main() {
-	tls := true
+	tls := readenv.TlsEnabled()
 	fmt.Println("tls is", tls)
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	if tls {

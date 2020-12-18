@@ -20,4 +20,5 @@ services:
     ports:
       - 50052:50052
     environment:
-      - DEPOSITS_GRPS_DB_HOST=depositsmongodb
+      - DEPOSITS_GRPC_DB_HOST=depositsmongodb
+      - DEPOSITS_GRPC_SERVICE_TLS=false

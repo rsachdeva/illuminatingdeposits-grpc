@@ -13,6 +13,7 @@ import (
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/readenv"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt"
 	"google.golang.org/grpc"
 )
@@ -23,7 +24,7 @@ const (
 )
 
 func main() {
-	tls := true
+	tls := readenv.TlsEnabled()
 	fmt.Println("tls is", tls)
 
 	log.SetFlags(log.LstdFlags | log.Ltime | log.Lshortfile)
@@ -37,7 +38,6 @@ func main() {
 		log.Fatalf("could not listen %v", err)
 	}
 
-	fmt.Println("tls option is ", tls)
 	var opts []grpc.ServerOption
 	if tls {
 		opts = tlsOpts(opts)

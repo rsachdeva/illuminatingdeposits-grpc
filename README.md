@@ -40,9 +40,9 @@ docker-compose -f ./deploy/compose/docker-compose.dbindexes.yml up --build
 ````
 
 ### To start all services without TLS:
-Make sure DEPOSITS_WEB_SERVICE_SERVER_TLS=false in docker-compose.grpc.server.yml
+Make sure DEPOSITS_GRPC_SERVICE_TLS=false in docker-compose.grpc.server.yml
 ### To start all services with TLS:
-Make sure DEPOSITS_WEB_SERVICE_SERVER_TLS=true in docker-compose.grpc.server.yml
+Make sure DEPOSITS_GRPC_SERVICE_TLS=true in docker-compose.grpc.server.yml
 ### And then execute:
 ```shell
 export COMPOSE_IGNORE_ORPHANS=True && \
@@ -65,8 +65,8 @@ docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up
 ```
 And then run following:
 ```shell
-export DEPOSITS_WEB_SERVICE_SERVER_TLS=true
-export DEPOSITS_GRPS_DB_HOST=127.0.0.1
+export DEPOSITS_GRPC_SERVICE_TLS=true
+export DEPOSITS_GRPC_DB_HOST=127.0.0.1
 go run ./tools/dbindexescli  (only once)
 go run ./cmd/server
 ```
@@ -75,10 +75,9 @@ go run ./cmd/server
 
 #### Sanity test Client:
 See    
-cmd/sanitytestclient/main.go  
-In main function -- change tls setting to true or false.
-The server side main function should also be consistent with tls setting.
-Uncomment any desired function request.
+cmd/sanitytestclient/main.go
+The server side DEPOSITS_GRPC_SERVICE_TLS should be consistent and set for client also.
+Uncomment any desired function request
 Make sure to make email unique to avoid error.
 
 # TLS files

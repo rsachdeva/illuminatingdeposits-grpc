@@ -19,4 +19,4 @@ services:
     command: >
       bash -c "./dbindexescli"
     environment:
-      - DEPOSITS_GRPS_DB_HOST=depositsmongodb
+      - DEPOSITS_GRPC_DB_HOST=depositsmongodb
