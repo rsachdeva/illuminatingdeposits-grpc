@@ -7,14 +7,14 @@ import (
 	"net"
 	"time"
 
-	"github.com/rsachdeva/illuminatingdeposits-grpc/api/interestcalpb"
-	"github.com/rsachdeva/illuminatingdeposits-grpc/api/mongodbhealthpb"
-	"github.com/rsachdeva/illuminatingdeposits-grpc/api/usermgmtpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth/mongodbhealthpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/readenv"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
 	"google.golang.org/grpc"
 )
 

@@ -4,7 +4,7 @@ package interestcal
 import (
 	"context"
 
-	"github.com/rsachdeva/illuminatingdeposits-grpc/api/interestcalpb"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
 )
 
 type ServiceServer struct {

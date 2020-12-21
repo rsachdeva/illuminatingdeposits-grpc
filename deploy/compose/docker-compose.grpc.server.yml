@@ -20,4 +20,4 @@ services:
       - 50052:50052
     environment:
       - DEPOSITS_GRPC_DB_HOST=depositsmongodb
-      - DEPOSITS_GRPC_SERVICE_TLS=false
+      - DEPOSITS_GRPC_SERVICE_TLS=true

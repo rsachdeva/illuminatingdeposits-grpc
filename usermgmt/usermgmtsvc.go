@@ -3,7 +3,7 @@ package usermgmt
 import (
 	"context"
 
-	"github.com/rsachdeva/illuminatingdeposits-grpc/api/usermgmtpb"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

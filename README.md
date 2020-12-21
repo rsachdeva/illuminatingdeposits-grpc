@@ -29,7 +29,7 @@ generateusermgmtservice.sh
 # Docker Compose Deployment
 
 # Start mongodb
-```
+```shell
 export COMPOSE_IGNORE_ORPHANS=True && \
 docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up 
 ```
@@ -51,8 +51,10 @@ docker-compose -f ./deploy/compose/docker-compose.grpc.server.yml up --build
 ```
 
 ### Logs of running services (in a separate terminal):
+```shell
 docker-compose -f ./deploy/compose/docker-compose.grpc.server.yml logs -f --tail 1  
 ``` 
+
 ### Shutdown
 ```shell
 docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml down
@@ -115,4 +117,4 @@ ps aux | grep "go_build"
 to confirm is something else is already running
 
 # Version
-v1.0
+v1.1

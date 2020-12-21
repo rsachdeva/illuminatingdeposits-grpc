@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/rsachdeva/illuminatingdeposits-grpc/api/interestcalpb"
-	"github.com/rsachdeva/illuminatingdeposits-grpc/api/mongodbhealthpb"
-	"github.com/rsachdeva/illuminatingdeposits-grpc/api/usermgmtpb"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth/mongodbhealthpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/readenv"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -51,7 +51,7 @@ func requestCreateUser(conn *grpc.ClientConn) {
 	req := usermgmtpb.CreateUserRequest{
 		NewUser: &usermgmtpb.NewUser{
 			Name:            "Rohit-Sachdeva-User",
-			Email:           "growth-l@drinnovations.us",
+			Email:           "growth-a@drinnovations.us",
 			Roles:           []string{"USER"},
 			Password:        "kubernetes",
 			PasswordConfirm: "kubernetes",

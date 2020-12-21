@@ -7,7 +7,7 @@ import (
 	"math"
 
 	"github.com/pkg/errors"
-	"github.com/rsachdeva/illuminatingdeposits-grpc/api/interestcalpb"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
 )
 
 const (

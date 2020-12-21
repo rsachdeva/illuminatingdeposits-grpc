@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/rsachdeva/illuminatingdeposits-grpc/api/mongodbhealthpb"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth/mongodbhealthpb"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )

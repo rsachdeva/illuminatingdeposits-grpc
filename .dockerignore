@@ -1,5 +1,5 @@
-build/
-deploy/
+build
+deploy
 generateinterestcalservice.sh
 generatemongodbhealthservice.sh
 generateusermgmtservice.sh

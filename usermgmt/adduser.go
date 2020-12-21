@@ -8,7 +8,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"github.com/rsachdeva/illuminatingdeposits-grpc/api/usermgmtpb"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

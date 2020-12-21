@@ -98,5 +98,5 @@ var _MongoDbHealthService_serviceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/mongodbhealthpb/mongodbhealthservice.proto",
+	Metadata: "mongodbhealth/mongodbhealthpb/mongodbhealthservice.proto",
 }

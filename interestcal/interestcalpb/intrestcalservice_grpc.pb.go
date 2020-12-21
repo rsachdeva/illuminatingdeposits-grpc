@@ -93,5 +93,5 @@ var _InterestCalService_serviceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/interestcalpb/intrestcalservice.proto",
+	Metadata: "interestcal/interestcalpb/intrestcalservice.proto",
 }
