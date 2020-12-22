@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package userauthnpb;
+option go_package = ".;userauthnpb";
+
+// User Authentication service
+// Create Token for Verified user first to login
+// This token is sent in Metadata by client
+
+
+message UserCredential {
+  string email = 1;
+  string password = 2;
+}
+
+message VerifiedUser {
+  string token = 1;
+}
+
+message CreateTokenRequest {
+   UserCredential credential = 1;
+}
+
+message CreateTokenResponse {
+   VerifiedUser authenticated  = 1;
+}
+
+service UserAuthnService {
+  rpc CreateToken(CreateTokenRequest) returns (CreateTokenResponse);
+}
