@@ -21,6 +21,11 @@ func generateToken(ctx context.Context, mdb *mongo.Database, ctreq *userauthnpb.
 		return nil, status.Errorf(codes.NotFound, fmt.Sprintf("NotFound Error: User not found for email %v", vyu.Email))
 	}
 	log.Printf("we were actually able to find the user %v\n", uFound)
+	pwMatchErr := passwordMatch(uFound.PasswordHash, vyu.Password)
+	log.Printf("Password match Err is %v\n", pwMatchErr)
+	if pwMatchErr != nil {
+		return nil, pwMatchErr
+	}
 	uaresp := userauthnpb.CreateTokenResponse{
 		Verifieduser: &userauthnpb.VerifiedUser{
 			Token: "still-to-generate",
