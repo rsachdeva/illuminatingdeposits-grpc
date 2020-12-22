@@ -187,6 +187,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not get token; cannot proceed %v ", err)
 	}
-	log.Println("JWT that can be used in next requests for Authentication", token)
+	log.Println("JWT that can be used in next requests for Authentication\n", token)
 	// requestCreateInterest(conn)
 }
