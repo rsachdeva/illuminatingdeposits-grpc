@@ -9,26 +9,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
-
-func findUserByUuid(ctx context.Context, coll *mongo.Collection, usr *usermgmtpb.User, uuid string) (*usermgmtpb.User, error) {
-	log.Printf("\n uuid is %v\n", uuid)
-	result := coll.FindOne(ctx, bson.M{"uuid": uuid})
-	log.Printf("result is %+v\n", result)
-	// As in json
-	if err := result.Decode(usr); err != nil {
-		return &usermgmtpb.User{}, status.Errorf(
-			codes.NotFound,
-			fmt.Sprintf("Cannot find blog with specified ID: %v", err))
-	}
-	return usr, nil
-}
 
 func addUser(ctx context.Context, mdb *mongo.Database, cureq *usermgmtpb.CreateUserRequest) (*usermgmtpb.CreateUserResponse, error) {
 	n := cureq.NewUser

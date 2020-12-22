@@ -8,6 +8,7 @@ import (
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth/mongodbhealthpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/readenv"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn/userauthnpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -64,6 +65,30 @@ func requestCreateUser(conn *grpc.ClientConn) {
 	}
 	log.Printf("ciresp is %+v", umresp)
 
+}
+
+func requestCreateToken(conn *grpc.ClientConn) (string, error) {
+	// Set up a connection to the server.
+	fmt.Println("starting requestCreateToken")
+
+	fmt.Println("calling NewUserMgmtServiceClient(conn)")
+	uAuthnSvcClient := userauthnpb.NewUserAuthnServiceClient(conn)
+	fmt.Println("uAuthnSvcClient client created")
+
+	req := userauthnpb.CreateTokenRequest{
+		VerifyUser: &userauthnpb.VerifyUser{
+			Email:    "growth-a@drinnovations.us",
+			Password: "kubernetes",
+		},
+	}
+
+	uaresp, err := uAuthnSvcClient.CreateToken(context.Background(), &req)
+	if err != nil {
+		log.Println("error calling CreateUser service", err)
+		return "", err
+	}
+	log.Printf("ciresp is %+v", uaresp)
+	return uaresp.Verifieduser.Token, nil
 }
 
 func requestCreateInterest(conn *grpc.ClientConn) {
@@ -157,7 +182,11 @@ func main() {
 	defer conn.Close()
 
 	requestGetMongoDBHealth(conn)
-	requestCreateUser(conn)
-	requestCreateInterest(conn)
-
+	// requestCreateUser(conn)
+	token, err := requestCreateToken(conn)
+	if err != nil {
+		log.Fatalf("could not get token; cannot proceed %v ", err)
+	}
+	log.Println("JWT that can be used in next requests for Authentication", token)
+	// requestCreateInterest(conn)
 }
