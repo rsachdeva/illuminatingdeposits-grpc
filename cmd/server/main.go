@@ -13,6 +13,8 @@ import (
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth/mongodbhealthpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/readenv"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn/userauthnpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
 	"google.golang.org/grpc"
@@ -49,6 +51,10 @@ func main() {
 	})
 	log.Println("Registering UserMgmtService...")
 	usermgmtpb.RegisterUserMgmtServiceServer(s, usermgmt.ServiceServer{
+		Mdb: mdb,
+	})
+	log.Println("Registering UserAuthenticationService...")
+	userauthnpb.RegisterUserAuthnServiceServer(s, userauthn.ServiceServer{
 		Mdb: mdb,
 	})
 	log.Println("Registering InterestCalService...")

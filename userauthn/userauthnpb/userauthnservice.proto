@@ -8,7 +8,7 @@ option go_package = ".;userauthnpb";
 // This token is sent in Metadata by client
 
 
-message UserCredential {
+message VerifyUser {
   string email = 1;
   string password = 2;
 }
@@ -18,11 +18,11 @@ message VerifiedUser {
 }
 
 message CreateTokenRequest {
-   UserCredential credential = 1;
+   VerifyUser verifyUser = 1;
 }
 
 message CreateTokenResponse {
-   VerifiedUser authenticated  = 1;
+   VerifiedUser verifieduser  = 1;
 }
 
 service UserAuthnService {
