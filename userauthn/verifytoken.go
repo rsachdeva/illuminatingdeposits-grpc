@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"google.golang.org/grpc/codes"
@@ -44,6 +43,12 @@ func verify(accessToken string) (*customClaims, error) {
 	)
 
 	if err != nil {
+		if ve, ok := err.(*jwt.ValidationError); ok {
+			log.Printf("interceptor verify got invalid token ve is: %v", ve)
+			if ve.Errors&(jwt.ValidationErrorExpired) != 0 {
+				return nil, status.Errorf(codes.Unauthenticated, fmt.Sprintf("Token is expired. Please recreate token: %v", err))
+			}
+		}
 		log.Printf("interceptor verify got invalid token: %v", err)
 		return nil, status.Errorf(codes.Unauthenticated, fmt.Sprintf("Verify got invalid token %v", err))
 	}
@@ -53,8 +58,5 @@ func verify(accessToken string) (*customClaims, error) {
 		return nil, fmt.Errorf("invalid token claims")
 	}
 	fmt.Printf("\nIn Verify claims are %+v\n", claims)
-	if claims.ExpiresAt < time.Now().UTC().Unix() {
-		return nil, status.Errorf(codes.Unauthenticated, fmt.Sprintf("Expired token, fetch token again: %v", err))
-	}
 	return claims, nil
 }

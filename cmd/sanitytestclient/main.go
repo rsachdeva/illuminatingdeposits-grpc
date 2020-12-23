@@ -9,6 +9,7 @@ import (
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth/mongodbhealthpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/readenv"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
+	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/oauth"
@@ -17,6 +18,7 @@ import (
 
 const (
 	address = "localhost:50052"
+	email   = "growth-t@drinnovations.us"
 )
 
 func tlsOption() grpc.DialOption {
@@ -52,7 +54,7 @@ func requestCreateUser(conn *grpc.ClientConn) {
 	req := usermgmtpb.CreateUserRequest{
 		NewUser: &usermgmtpb.NewUser{
 			Name:            "Rohit-Sachdeva-User",
-			Email:           "growth-x@drinnovations.us",
+			Email:           email,
 			Roles:           []string{"USER"},
 			Password:        "kubernetes",
 			PasswordConfirm: "kubernetes",
@@ -160,12 +162,27 @@ func main() {
 	}
 	defer conn.Close()
 
+	nonTokenRequests(conn)
+	oaToken := newTokenRequest(conn)
+	tokenRequiredRequests(oaToken, opts)
+}
+
+func nonTokenRequests(conn *grpc.ClientConn) {
 	requestGetMongoDBHealth(conn)
 	requestCreateUser(conn)
-	oaToken, err := oAuthToken(conn)
+}
+
+func newTokenRequest(conn *grpc.ClientConn) *oauth2.Token {
+	// see NewOauthTokenRequest to force to use expired token
+	oaToken, err := newOauthTokenRequest(conn, true)
 	if err != nil {
 		log.Fatalf("could not get token for the verification of user; cannot proceed without token %v ", err)
 	}
+	log.Printf("New JWT that can be used in next requests for Authentication %#v\n", oaToken)
+	return oaToken
+}
+
+func tokenRequiredRequests(oaToken *oauth2.Token, opts []grpc.DialOption) {
 	perRPC := oauth.NewOauthAccess(oaToken)
 	opts = append(opts, grpc.WithPerRPCCredentials(perRPC))
 	for _, v := range opts {
@@ -176,6 +193,5 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer connWithToken.Close()
-	log.Printf("JWT that can be used in next requests for Authentication %#v\n", oaToken)
 	requestCreateInterest(connWithToken)
 }

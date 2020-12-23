@@ -20,7 +20,7 @@ func requestCreateToken(conn *grpc.ClientConn) (string, error) {
 
 	req := userauthnpb.CreateTokenRequest{
 		VerifyUser: &userauthnpb.VerifyUser{
-			Email:    "growth-a@drinnovations.us",
+			Email:    email,
 			Password: "kubernetes",
 		},
 	}
@@ -32,17 +32,30 @@ func requestCreateToken(conn *grpc.ClientConn) (string, error) {
 	}
 	log.Printf("uaresp is %+v", uaresp)
 	// return "haha", nil
-	return uaresp.Verifieduser.Token, nil
+	return uaresp.Verifieduser.AccessToken, nil
 }
 
-func oAuthToken(conn *grpc.ClientConn) (*oauth2.Token, error) {
-	token, err := requestCreateToken(conn)
+func newOauthTokenRequest(conn *grpc.ClientConn, useExpired bool) (*oauth2.Token, error) {
+	token, err := accessToken(conn, useExpired)
 	if err != nil {
 		return nil, err
 	}
-	log.Println("JWT that can be used in next requests for Authentication\n", token)
 	return &oauth2.Token{
 		AccessToken: token,
 		TokenType:   "Bearer",
 	}, nil
+}
+
+func accessToken(conn *grpc.ClientConn, useExpired bool) (string, error) {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imdyb3d0aC1hQGRyaW5ub3ZhdGlvbnMudXMiLCJyb2xlcyI6WyJVU0VSIl0sImV4cCI6MTYwODc0MzA4NywiaXNzIjoiZ2l0aHViLmNvbS9yc2FjaGRldmEvaWxsdW1pbmF0aW5nZGVwb3NpdHMtZ3JwYyJ9.KJJI-GU_kDqDXK_NOa-BC3eBfOvcOtIQ6Ho61kN7rMI"
+	if useExpired {
+		log.Println("Excpired JWT for testing\n", token)
+		return token, nil
+	}
+	token, err := requestCreateToken(conn)
+	if err != nil {
+		return "", err
+	}
+	log.Println("New JWT that can be used in next requests for Authentication\n", token)
+	return token, nil
 }

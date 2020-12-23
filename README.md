@@ -25,7 +25,15 @@ generateusermgmtservice.sh
 <img src="./logo.png" alt="Illuminating Deposits Project Logo" title="Illuminating Deposits Project Logo" />
 </p>
 
-# gRPC API with protobuf for Messages
+# Features include:
+#### Golang (Go) gRPC Service Methods with protobuf for Messages.
+####  TLS + User Management with MongoDB.
+####  JWT generation for authentication.
+####  TLS + JWT Authentication for Interest Calculations.
+####  30daysInterest for a deposit is called Delta.
+####  Delta is for each deposit; each bank with many deposits and also a delta for everything!
+####  Sanity test client included.
+
 # Docker Compose Deployment
 
 # Start mongodb
@@ -117,4 +125,4 @@ ps aux | grep "go_build"
 to confirm is something else is already running
 
 # Version
-v1.27
+v2.0

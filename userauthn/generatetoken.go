@@ -57,7 +57,7 @@ func generateToken(ctx context.Context, mdb *mongo.Database, ctreq *userauthnpb.
 	fmt.Println("signedToken generated finally is", signedToken)
 	uaresp := userauthnpb.CreateTokenResponse{
 		Verifieduser: &userauthnpb.VerifiedUser{
-			Token: signedToken,
+			AccessToken: signedToken,
 		},
 	}
 	return &uaresp, nil
