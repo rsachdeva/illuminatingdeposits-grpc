@@ -46,19 +46,19 @@ func main() {
 	}
 	opts = append(opts, grpc.UnaryInterceptor(userauthn.EnsureValidToken))
 	s := grpc.NewServer(opts...)
-	log.Println("Registering MongoDBHealthService...")
+	log.Println("Registering gRPC proto MongoDBHealthService...")
 	mongodbhealthpb.RegisterMongoDbHealthServiceServer(s, mongodbhealth.ServiceServer{
 		Mct: mongodbconn.ConnectMongoDB(ctx, 2),
 	})
-	log.Println("Registering UserMgmtService...")
+	log.Println("Registering gRPC proto UserMgmtService...")
 	usermgmtpb.RegisterUserMgmtServiceServer(s, usermgmt.ServiceServer{
 		Mdb: mdb,
 	})
-	log.Println("Registering UserAuthenticationService...")
+	log.Println("Registering gRPC proto UserAuthenticationService...")
 	userauthnpb.RegisterUserAuthnServiceServer(s, userauthn.ServiceServer{
 		Mdb: mdb,
 	})
-	log.Println("Registering InterestCalService...")
+	log.Println("Registering gRPC proto InterestCalService...")
 	interestcalpb.RegisterInterestCalServiceServer(s, interestcal.ServiceServer{})
 
 	serveWithShutdown(ctx, s, lis, mt)

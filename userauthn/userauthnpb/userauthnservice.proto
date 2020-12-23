@@ -18,11 +18,11 @@ message VerifiedUser {
 }
 
 message CreateTokenRequest {
-   VerifyUser verifyUser = 1;
+   VerifyUser verify_user = 1;
 }
 
 message CreateTokenResponse {
-   VerifiedUser verifieduser  = 1;
+   VerifiedUser verified_user  = 1;
 }
 
 service UserAuthnService {

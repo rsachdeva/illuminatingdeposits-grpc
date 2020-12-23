@@ -33,7 +33,7 @@ func requestCreateToken(conn *grpc.ClientConn, email string) (string, error) {
 	}
 	log.Printf("uaresp is %+v", uaresp)
 	// return "haha", nil
-	return uaresp.Verifieduser.AccessToken, nil
+	return uaresp.VerifiedUser.AccessToken, nil
 }
 
 func newOauthTokenRequest(conn *grpc.ClientConn, useExpired bool, email string) (*oauth2.Token, error) {

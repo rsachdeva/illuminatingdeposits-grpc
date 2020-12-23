@@ -26,13 +26,20 @@ generateusermgmtservice.sh
 </p>
 
 # Features include:
-- Golang (Go) gRPC Service Methods with protobuf for Messages.
-- TLS + User Management with MongoDB.
-- JWT generation for authentication. 
-- TLS + JWT Authentication for Interest Calculations.
-- 30daysInterest for a deposit is called Delta.
-- Delta is for each deposit; each bank with many deposits and also a delta for everything!
-- Sanity test client included.
+- Golang (Go) gRPC Service Methods with protobuf for Messages
+- TLS for all requests
+- MongoDB health check service
+- User Management service with MongoDB for user creation
+- JWT generation for Authentication 
+- JWT Authentication for Interest Calculations
+- 30daysInterest for a deposit is called Delta
+- Delta is for 
+     - each deposit 
+     - each bank with all deposits
+     - all banks!
+- Sanity test client included
+- Docker support 
+- Docker compose deployment for development 
 
 # Docker Compose Deployment
 
