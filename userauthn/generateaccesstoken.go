@@ -25,7 +25,7 @@ type customClaims struct {
 	jwt.StandardClaims
 }
 
-func generateToken(ctx context.Context, mdb *mongo.Database, ctreq *userauthnpb.CreateTokenRequest) (*userauthnpb.CreateTokenResponse, error) {
+func generateAccessToken(ctx context.Context, mdb *mongo.Database, ctreq *userauthnpb.CreateTokenRequest) (*userauthnpb.CreateTokenResponse, error) {
 	vyu := ctreq.VerifyUser
 	coll := mdb.Collection("user")
 	uFound, err := usermgmt.FindUserByEmail(ctx, coll, vyu.Email)

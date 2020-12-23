@@ -26,13 +26,13 @@ generateusermgmtservice.sh
 </p>
 
 # Features include:
-#### Golang (Go) gRPC Service Methods with protobuf for Messages.
-####  TLS + User Management with MongoDB.
-####  JWT generation for authentication.
-####  TLS + JWT Authentication for Interest Calculations.
-####  30daysInterest for a deposit is called Delta.
-####  Delta is for each deposit; each bank with many deposits and also a delta for everything!
-####  Sanity test client included.
+- Golang (Go) gRPC Service Methods with protobuf for Messages.
+- TLS + User Management with MongoDB.
+- JWT generation for authentication. 
+- TLS + JWT Authentication for Interest Calculations.
+- 30daysInterest for a deposit is called Delta.
+- Delta is for each deposit; each bank with many deposits and also a delta for everything!
+- Sanity test client included.
 
 # Docker Compose Deployment
 
@@ -86,11 +86,14 @@ go run ./cmd/server
 ### gRPC Services Endpoints Invoked:
 
 #### Sanity test Client:
-See    
-cmd/sanitytestclient/main.go
 The server side DEPOSITS_GRPC_SERVICE_TLS should be consistent and set for client also.
 Uncomment any desired function request
 Make sure to make email unique to avoid error.
+
+```shell 
+export GODEBUG=x509ignoreCN=0
+go run ./cmd/sanitytestclient
+```
 
 # TLS files
 ```shell

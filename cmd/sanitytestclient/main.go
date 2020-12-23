@@ -1,3 +1,9 @@
+// Proivides sanity test client with all requests/ TLS/ JWT
+// This is to help with quick check of overall system
+// useful when doing refactoring as well
+// uses unique email to allow new user creation and use access token for the newly created user
+// replace alrerady persisted email if requestCreateUser is not desired in nonAccessTokenRequests
+// otherwise user not found error will happen
 package main
 
 import (
@@ -5,6 +11,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/google/uuid"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth/mongodbhealthpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/readenv"
@@ -17,9 +24,33 @@ import (
 )
 
 const (
-	address = "localhost:50052"
-	email   = "growth-t@drinnovations.us"
+	address  = "localhost:50052"
+	emailFmt = "growth-%v@drinnovations.us"
 )
+
+func main() {
+	tls := readenv.TlsEnabled()
+	fmt.Println("tls is", tls)
+	opts := []grpc.DialOption{grpc.WithInsecure()}
+	if tls {
+		opts = []grpc.DialOption{tlsOption()}
+	}
+	for _, v := range opts {
+		fmt.Printf("initial opts v type is %T and val is %v\n", v, v)
+	}
+
+	conn, err := grpc.Dial(address, opts...)
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	email := fmt.Sprintf(emailFmt, uuid.New().String())
+	nonAccessTokenRequests(conn, email)
+	// replace alrerady persisted email if requestCreateUser is not desired in nonAccessTokenRequests
+	// otherwise user not found error will happen
+	oaToken := newAccessTokenRequest(conn, email)
+	accessTokenRequiredRequests(oaToken, opts)
+}
 
 func tlsOption() grpc.DialOption {
 	certFile := "conf/tls/cacrtto.pem"
@@ -43,7 +74,7 @@ func requestGetMongoDBHealth(conn *grpc.ClientConn) {
 	log.Printf("mdbresp is %+v", mdbresp)
 }
 
-func requestCreateUser(conn *grpc.ClientConn) {
+func requestCreateUser(conn *grpc.ClientConn, email string) {
 	// Set up a connection to the server.
 	fmt.Println("starting requestCreateUser")
 
@@ -145,36 +176,14 @@ func requestCreateInterest(conn *grpc.ClientConn) {
 	log.Printf("\nciresp is %+v", ciresp)
 }
 
-func main() {
-	tls := readenv.TlsEnabled()
-	fmt.Println("tls is", tls)
-	opts := []grpc.DialOption{grpc.WithInsecure()}
-	if tls {
-		opts = []grpc.DialOption{tlsOption()}
-	}
-	for _, v := range opts {
-		fmt.Printf("initial opts v type is %T and val is %v\n", v, v)
-	}
-
-	conn, err := grpc.Dial(address, opts...)
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-
-	nonTokenRequests(conn)
-	oaToken := newTokenRequest(conn)
-	tokenRequiredRequests(oaToken, opts)
-}
-
-func nonTokenRequests(conn *grpc.ClientConn) {
+func nonAccessTokenRequests(conn *grpc.ClientConn, email string) {
 	requestGetMongoDBHealth(conn)
-	requestCreateUser(conn)
+	requestCreateUser(conn, email)
 }
 
-func newTokenRequest(conn *grpc.ClientConn) *oauth2.Token {
+func newAccessTokenRequest(conn *grpc.ClientConn, email string) *oauth2.Token {
 	// see NewOauthTokenRequest to force to use expired token
-	oaToken, err := newOauthTokenRequest(conn, true)
+	oaToken, err := newOauthTokenRequest(conn, false, email)
 	if err != nil {
 		log.Fatalf("could not get token for the verification of user; cannot proceed without token %v ", err)
 	}
@@ -182,7 +191,7 @@ func newTokenRequest(conn *grpc.ClientConn) *oauth2.Token {
 	return oaToken
 }
 
-func tokenRequiredRequests(oaToken *oauth2.Token, opts []grpc.DialOption) {
+func accessTokenRequiredRequests(oaToken *oauth2.Token, opts []grpc.DialOption) {
 	perRPC := oauth.NewOauthAccess(oaToken)
 	opts = append(opts, grpc.WithPerRPCCredentials(perRPC))
 	for _, v := range opts {

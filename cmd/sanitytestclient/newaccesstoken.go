@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 
 	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn/userauthnpb"
@@ -10,7 +11,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func requestCreateToken(conn *grpc.ClientConn) (string, error) {
+func requestCreateToken(conn *grpc.ClientConn, email string) (string, error) {
 	// Set up a connection to the server.
 	fmt.Println("starting requestCreateToken")
 
@@ -35,8 +36,8 @@ func requestCreateToken(conn *grpc.ClientConn) (string, error) {
 	return uaresp.Verifieduser.AccessToken, nil
 }
 
-func newOauthTokenRequest(conn *grpc.ClientConn, useExpired bool) (*oauth2.Token, error) {
-	token, err := accessToken(conn, useExpired)
+func newOauthTokenRequest(conn *grpc.ClientConn, useExpired bool, email string) (*oauth2.Token, error) {
+	token, err := accessToken(conn, useExpired, email)
 	if err != nil {
 		return nil, err
 	}
@@ -46,13 +47,18 @@ func newOauthTokenRequest(conn *grpc.ClientConn, useExpired bool) (*oauth2.Token
 	}, nil
 }
 
-func accessToken(conn *grpc.ClientConn, useExpired bool) (string, error) {
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imdyb3d0aC1hQGRyaW5ub3ZhdGlvbnMudXMiLCJyb2xlcyI6WyJVU0VSIl0sImV4cCI6MTYwODc0MzA4NywiaXNzIjoiZ2l0aHViLmNvbS9yc2FjaGRldmEvaWxsdW1pbmF0aW5nZGVwb3NpdHMtZ3JwYyJ9.KJJI-GU_kDqDXK_NOa-BC3eBfOvcOtIQ6Ho61kN7rMI"
+func accessToken(conn *grpc.ClientConn, useExpired bool, email string) (string, error) {
+	var token string
 	if useExpired {
-		log.Println("Excpired JWT for testing\n", token)
+		by, err := ioutil.ReadFile("cmd/sanitytestclient/expiredtoken.data")
+		token = string(by)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("Expired JWT for testing\n", token)
 		return token, nil
 	}
-	token, err := requestCreateToken(conn)
+	token, err := requestCreateToken(conn, email)
 	if err != nil {
 		return "", err
 	}

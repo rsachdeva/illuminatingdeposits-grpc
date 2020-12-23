@@ -13,7 +13,7 @@ type ServiceServer struct {
 }
 
 func (svc ServiceServer) CreateToken(ctx context.Context, ctreq *userauthnpb.CreateTokenRequest) (*userauthnpb.CreateTokenResponse, error) {
-	resp, err := generateToken(ctx, svc.Mdb, ctreq)
+	resp, err := generateAccessToken(ctx, svc.Mdb, ctreq)
 	if err != nil {
 		return nil, err
 	}
