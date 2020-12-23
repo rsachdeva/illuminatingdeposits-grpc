@@ -30,7 +30,8 @@ func requestCreateToken(conn *grpc.ClientConn) (string, error) {
 		log.Println("error calling CreateUser service", err)
 		return "", err
 	}
-	log.Printf("ciresp is %+v", uaresp)
+	log.Printf("uaresp is %+v", uaresp)
+	// return "haha", nil
 	return uaresp.Verifieduser.Token, nil
 }
 

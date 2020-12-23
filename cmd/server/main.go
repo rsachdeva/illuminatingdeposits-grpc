@@ -44,6 +44,7 @@ func main() {
 	if tls {
 		opts = tlsOpts(opts)
 	}
+	opts = append(opts, grpc.UnaryInterceptor(userauthn.EnsureValidToken))
 	s := grpc.NewServer(opts...)
 	log.Println("Registering MongoDBHealthService...")
 	mongodbhealthpb.RegisterMongoDbHealthServiceServer(s, mongodbhealth.ServiceServer{

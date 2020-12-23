@@ -117,4 +117,4 @@ ps aux | grep "go_build"
 to confirm is something else is already running
 
 # Version
-v1.26
+v1.27

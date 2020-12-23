@@ -52,7 +52,7 @@ func requestCreateUser(conn *grpc.ClientConn) {
 	req := usermgmtpb.CreateUserRequest{
 		NewUser: &usermgmtpb.NewUser{
 			Name:            "Rohit-Sachdeva-User",
-			Email:           "growth-b@drinnovations.us",
+			Email:           "growth-x@drinnovations.us",
 			Roles:           []string{"USER"},
 			Password:        "kubernetes",
 			PasswordConfirm: "kubernetes",
@@ -176,6 +176,6 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer connWithToken.Close()
-	log.Printf("JWT that can be used in next requests for Authentication %+v\n", oaToken)
+	log.Printf("JWT that can be used in next requests for Authentication %#v\n", oaToken)
 	requestCreateInterest(connWithToken)
 }

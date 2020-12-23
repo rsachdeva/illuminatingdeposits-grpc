@@ -16,7 +16,7 @@ import (
 
 const (
 	secretKey     = "kubernetessecret"
-	tokenDuration = 15 * time.Minute
+	tokenDuration = 1 * time.Minute
 )
 
 type customClaims struct {
