@@ -8,10 +8,10 @@ import (
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth/mongodbhealthpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/readenv"
-	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn/userauthnpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/oauth"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -52,7 +52,7 @@ func requestCreateUser(conn *grpc.ClientConn) {
 	req := usermgmtpb.CreateUserRequest{
 		NewUser: &usermgmtpb.NewUser{
 			Name:            "Rohit-Sachdeva-User",
-			Email:           "growth-a@drinnovations.us",
+			Email:           "growth-b@drinnovations.us",
 			Roles:           []string{"USER"},
 			Password:        "kubernetes",
 			PasswordConfirm: "kubernetes",
@@ -65,30 +65,6 @@ func requestCreateUser(conn *grpc.ClientConn) {
 	}
 	log.Printf("ciresp is %+v", umresp)
 
-}
-
-func requestCreateToken(conn *grpc.ClientConn) (string, error) {
-	// Set up a connection to the server.
-	fmt.Println("starting requestCreateToken")
-
-	fmt.Println("calling NewUserMgmtServiceClient(conn)")
-	uAuthnSvcClient := userauthnpb.NewUserAuthnServiceClient(conn)
-	fmt.Println("uAuthnSvcClient client created")
-
-	req := userauthnpb.CreateTokenRequest{
-		VerifyUser: &userauthnpb.VerifyUser{
-			Email:    "growth-a@drinnovations.us",
-			Password: "kubernetes",
-		},
-	}
-
-	uaresp, err := uAuthnSvcClient.CreateToken(context.Background(), &req)
-	if err != nil {
-		log.Println("error calling CreateUser service", err)
-		return "", err
-	}
-	log.Printf("ciresp is %+v", uaresp)
-	return uaresp.Verifieduser.Token, nil
 }
 
 func requestCreateInterest(conn *grpc.ClientConn) {
@@ -174,6 +150,9 @@ func main() {
 	if tls {
 		opts = []grpc.DialOption{tlsOption()}
 	}
+	for _, v := range opts {
+		fmt.Printf("initial opts v type is %T and val is %v\n", v, v)
+	}
 
 	conn, err := grpc.Dial(address, opts...)
 	if err != nil {
@@ -182,11 +161,21 @@ func main() {
 	defer conn.Close()
 
 	requestGetMongoDBHealth(conn)
-	// requestCreateUser(conn)
-	token, err := requestCreateToken(conn)
+	requestCreateUser(conn)
+	oaToken, err := oAuthToken(conn)
 	if err != nil {
-		log.Fatalf("could not get token; cannot proceed %v ", err)
+		log.Fatalf("could not get token for the verification of user; cannot proceed without token %v ", err)
 	}
-	log.Println("JWT that can be used in next requests for Authentication\n", token)
-	// requestCreateInterest(conn)
+	perRPC := oauth.NewOauthAccess(oaToken)
+	opts = append(opts, grpc.WithPerRPCCredentials(perRPC))
+	for _, v := range opts {
+		fmt.Printf("Opts v type is %T and val is %v\n", v, v)
+	}
+	connWithToken, err := grpc.Dial(address, opts...)
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer connWithToken.Close()
+	log.Printf("JWT that can be used in next requests for Authentication %+v\n", oaToken)
+	requestCreateInterest(connWithToken)
 }

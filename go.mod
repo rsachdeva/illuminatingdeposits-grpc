@@ -9,6 +9,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	go.mongodb.org/mongo-driver v1.4.4
 	golang.org/x/crypto v0.0.0-20190530122614-20be4c3c3ed5
+	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
 	google.golang.org/grpc v1.34.0
 	google.golang.org/protobuf v1.25.0
 )
