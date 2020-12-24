@@ -1,9 +1,9 @@
-// Proivides sanity test client with all requests/ TLS/ JWT
-// This is to help with quick check of overall system
-// useful when doing refactoring as well
-// uses unique email to allow new user creation and use access token for the newly created user
-// replace alrerady persisted email if requestCreateUser is not desired in nonAccessTokenRequests
-// otherwise user not found error will happen
+// Provides sanity test client with all gRPC requests with TLS and when required JWT Authentication.
+// This is to help with quick check of overall system.
+// It is useful when doing refactoring as well.
+// Uses unique email every time to allow new user creation and uses access token for the newly created user.
+// Replace already persisted email in requestAccessToken, if requestCreateUser is not desired,
+// otherwise user not found error will happen.
 package main
 
 import (
@@ -48,8 +48,27 @@ func main() {
 	nonAccessTokenRequests(conn, email)
 	// replace alrerady persisted email if requestCreateUser is not desired in nonAccessTokenRequests
 	// otherwise user not found error will happen
-	oaToken := newAccessTokenRequest(conn, email)
+	oaToken := requestAccessToken(conn, email, false)
 	accessTokenRequiredRequests(oaToken, opts)
+}
+
+func nonAccessTokenRequests(conn *grpc.ClientConn, email string) {
+	requestGetMongoDBHealth(conn)
+	requestCreateUser(conn, email)
+}
+
+func accessTokenRequiredRequests(oaToken *oauth2.Token, opts []grpc.DialOption) {
+	perRPC := oauth.NewOauthAccess(oaToken)
+	opts = append(opts, grpc.WithPerRPCCredentials(perRPC))
+	for _, v := range opts {
+		fmt.Printf("Opts v type is %T and val is %v\n", v, v)
+	}
+	connWithToken, err := grpc.Dial(address, opts...)
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer connWithToken.Close()
+	requestCreateInterest(connWithToken)
 }
 
 func tlsOption() grpc.DialOption {
@@ -63,8 +82,7 @@ func tlsOption() grpc.DialOption {
 }
 
 func requestGetMongoDBHealth(conn *grpc.ClientConn) {
-	fmt.Println("starting requestGetMongoDBHealth")
-	fmt.Println("calling NewMongoDbHealthServiceClient(conn)")
+	fmt.Println("executing requestGetMongoDBHealth")
 	mdbSvcClient := mongodbhealthpb.NewMongoDbHealthServiceClient(conn)
 	fmt.Println("mdbSvcClient client created")
 	mdbresp, err := mdbSvcClient.GetMongoDBHealth(context.Background(), &emptypb.Empty{})
@@ -76,7 +94,7 @@ func requestGetMongoDBHealth(conn *grpc.ClientConn) {
 
 func requestCreateUser(conn *grpc.ClientConn, email string) {
 	// Set up a connection to the server.
-	fmt.Println("starting requestCreateUser")
+	fmt.Println("executing requestCreateUser")
 
 	fmt.Println("calling NewUserMgmtServiceClient(conn)")
 	uMgmtSvcClient := usermgmtpb.NewUserMgmtServiceClient(conn)
@@ -101,7 +119,7 @@ func requestCreateUser(conn *grpc.ClientConn, email string) {
 }
 
 func requestCreateInterest(conn *grpc.ClientConn) {
-	fmt.Println("starting requestCreateInterest")
+	fmt.Println("executing requestCreateInterest")
 	iCalSvcClient := interestcalpb.NewInterestCalServiceClient(conn)
 	fmt.Printf("iCalSvcClient client created")
 
@@ -174,33 +192,4 @@ func requestCreateInterest(conn *grpc.ClientConn) {
 		log.Println("error calling CreateInterest service", err)
 	}
 	log.Printf("\nciresp is %+v", ciresp)
-}
-
-func nonAccessTokenRequests(conn *grpc.ClientConn, email string) {
-	requestGetMongoDBHealth(conn)
-	requestCreateUser(conn, email)
-}
-
-func newAccessTokenRequest(conn *grpc.ClientConn, email string) *oauth2.Token {
-	// see NewOauthTokenRequest to force to use expired token
-	oaToken, err := newOauthTokenRequest(conn, false, email)
-	if err != nil {
-		log.Fatalf("could not get token for the verification of user; cannot proceed without token %v ", err)
-	}
-	log.Printf("New JWT that can be used in next requests for Authentication %#v\n", oaToken)
-	return oaToken
-}
-
-func accessTokenRequiredRequests(oaToken *oauth2.Token, opts []grpc.DialOption) {
-	perRPC := oauth.NewOauthAccess(oaToken)
-	opts = append(opts, grpc.WithPerRPCCredentials(perRPC))
-	for _, v := range opts {
-		fmt.Printf("Opts v type is %T and val is %v\n", v, v)
-	}
-	connWithToken, err := grpc.Dial(address, opts...)
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer connWithToken.Close()
-	requestCreateInterest(connWithToken)
 }

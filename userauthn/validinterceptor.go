@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -32,4 +33,21 @@ func EnsureValidToken(ctx context.Context, req interface{}, info *grpc.UnaryServ
 	}
 	// Continue execution of handler after ensuring a valid token.
 	return handler(ctx, req)
+}
+
+// valid validates the authorization.
+func valid(authorization []string) error {
+	if len(authorization) < 1 {
+		return status.Errorf(codes.Unauthenticated, "no authorization header")
+	}
+	token := strings.TrimPrefix(authorization[0], "Bearer ")
+	claims, err := verify(token)
+	if err != nil {
+		return err
+	}
+	email := claims.Email
+	if len(email) < 1 {
+		return status.Errorf(codes.Unauthenticated, "invalid token without email")
+	}
+	return nil
 }

@@ -94,8 +94,7 @@ go run ./cmd/server
 
 #### Sanity test Client:
 The server side DEPOSITS_GRPC_SERVICE_TLS should be consistent and set for client also.
-Uncomment any desired function request
-Make sure to make email unique to avoid error.
+Uncomment any request function if not desired.
 
 ```shell 
 export GODEBUG=x509ignoreCN=0
@@ -117,7 +116,7 @@ docker run -ti -v $PWD/conf/tls:/tls tlscert:v0.1 sh
 You get a prompt
 /tls 
 
-And enter version check
+Check version using command:
 ```shell
 openssl version
 ```

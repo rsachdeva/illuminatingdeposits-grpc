@@ -3,29 +3,11 @@ package userauthn
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
-
-// valid validates the authorization.
-func valid(authorization []string) error {
-	if len(authorization) < 1 {
-		return status.Errorf(codes.Unauthenticated, "no authorization header")
-	}
-	token := strings.TrimPrefix(authorization[0], "Bearer ")
-	claims, err := verify(token)
-	if err != nil {
-		return err
-	}
-	email := claims.Email
-	if len(email) < 1 {
-		return status.Errorf(codes.Unauthenticated, "invalid token without email")
-	}
-	return nil
-}
 
 // Verify verifies the access token string and return a user claim if the token is valid
 func verify(accessToken string) (*customClaims, error) {
@@ -57,6 +39,6 @@ func verify(accessToken string) (*customClaims, error) {
 	if !ok {
 		return nil, fmt.Errorf("invalid token claims")
 	}
-	fmt.Printf("\nIn Verify claims are %+v\n", claims)
+	fmt.Printf("In Verify claims are %+v\n", claims)
 	return claims, nil
 }
