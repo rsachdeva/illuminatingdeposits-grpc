@@ -181,4 +181,4 @@ docker stop $(docker ps -qa)
 docker rm -f $(docker ps -qa)
 ```
 # Version
-v2.26
+v2.27

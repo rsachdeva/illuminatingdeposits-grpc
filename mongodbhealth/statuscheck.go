@@ -9,12 +9,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func statusCheck(ctx context.Context, mct *mongo.Client) *mongodbhealthpb.GetMongoDBHealthResponse {
+func statusCheck(ctx context.Context, mt *mongo.Client) *mongodbhealthpb.GetMongoDBHealthResponse {
 
 	//  Running this query forces a
 	// round trip to the mongodb.
-	status := "Ok"
-	if err := mct.Ping(
+	status := "MongoDb Ok"
+	if err := mt.Ping(
 		ctx,
 		&readpref.ReadPref{},
 	); err != nil {

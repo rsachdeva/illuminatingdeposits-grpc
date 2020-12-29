@@ -1,4 +1,4 @@
-package main
+package mongodbhealthsvc_test
 
 import (
 	"context"
@@ -12,6 +12,7 @@ import (
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth/mongodbhealthpb"
 	"github.com/stretchr/testify/require"
+	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -20,11 +21,9 @@ const (
 	address = "localhost:50053"
 )
 
-func initGRPCServerHTTP2(t *testing.T) {
+func initGRPCServerHTTP2(t *testing.T, mt *mongo.Client) {
 	log.SetFlags(log.LstdFlags | log.Ltime | log.Lshortfile)
 	log.Println("Starting ServiceServer...")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
 	lis, err := net.Listen("tcp", address)
 	if err != nil {
 		log.Fatalf("could not listen %v", err)
@@ -33,7 +32,6 @@ func initGRPCServerHTTP2(t *testing.T) {
 	var opts []grpc.ServerOption
 	s := grpc.NewServer(opts...)
 	log.Println("Registering gRPC proto MongoDBHealthService...")
-	mt, pool, resource := mongodbtestconn.Connect(ctx, 10)
 	mongodbhealthpb.RegisterMongoDbHealthServiceServer(s, mongodbhealth.ServiceServer{
 		Mct: mt,
 	})
@@ -46,17 +44,20 @@ func initGRPCServerHTTP2(t *testing.T) {
 	}()
 
 	t.Cleanup(func() {
-		fmt.Println("Purging dockertest for mongodb always; unless commented out to examine any data")
-		err = pool.Purge(resource)
-		if err != nil {
-			t.Fatalf("Could not purge container: %v", err)
-		}
+		log.Println("Stopping the server...")
+		s.Stop()
+		log.Println("Closing the listener...")
+		lis.Close()
+		log.Println("End of program")
 	})
 }
 
 // Conventional test that starts a gRPC server and client test the service with RPC
-func TestServiceServer_GetMongoDBHealth(t *testing.T) {
-	initGRPCServerHTTP2(t) // Starting a conventional gRPC server runs on HTTP2
+func TestServiceServer_GetMongoDBHealthOk(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	mt, pool, resource := mongodbtestconn.Connect(ctx, 10)
+	initGRPCServerHTTP2(t, mt) // Starting a conventional gRPC server runs on HTTP2
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -68,5 +69,37 @@ func TestServiceServer_GetMongoDBHealth(t *testing.T) {
 		log.Fatalf("Could not check Mongodb status: %v", err)
 	}
 	log.Printf("response %s", mdbresp.Health)
-	require.Equal(t, mdbresp.Health.Status, "Ok")
+	require.Equal(t, mdbresp.Health.Status, "MongoDb Ok")
+
+	t.Cleanup(func() {
+		fmt.Println("Purging dockertest for mongodb always; unless commented out to examine any data")
+		err = pool.Purge(resource)
+		if err != nil {
+			t.Fatalf("Could not purge container: %v", err)
+		}
+	})
+}
+
+// Conventional test that starts a gRPC server and client test the service with RPC
+func TestServiceServer_GetMongoDBHealthNotOk(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	mt, pool, resource := mongodbtestconn.Connect(ctx, 1)
+	initGRPCServerHTTP2(t, mt) // Starting a conventional gRPC server runs on HTTP2
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	mdbSvcClient := mongodbhealthpb.NewMongoDbHealthServiceClient(conn)
+	err = pool.Purge(resource)
+	if err != nil {
+		t.Fatalf("Could not purge container: %v", err)
+	}
+	mdbresp, err := mdbSvcClient.GetMongoDBHealth(context.Background(), &emptypb.Empty{})
+	if err != nil {
+		log.Fatalf("Could not check Mongodb status: %v", err)
+	}
+	log.Printf("response %s", mdbresp.Health)
+	require.Equal(t, mdbresp.Health.Status, "MongoDB Not Ready")
 }
