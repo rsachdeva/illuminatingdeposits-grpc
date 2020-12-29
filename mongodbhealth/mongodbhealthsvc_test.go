@@ -1,4 +1,4 @@
-package mongodbhealthsvc_test
+package mongodbhealth_test
 
 import (
 	"context"
@@ -22,6 +22,8 @@ const (
 )
 
 func initGRPCServerHTTP2(t *testing.T, mt *mongo.Client) {
+	t.Parallel()
+
 	log.SetFlags(log.LstdFlags | log.Ltime | log.Lshortfile)
 	log.Println("Starting ServiceServer...")
 	lis, err := net.Listen("tcp", address)
@@ -54,6 +56,8 @@ func initGRPCServerHTTP2(t *testing.T, mt *mongo.Client) {
 
 // Conventional test that starts a gRPC server and client test the service with RPC
 func TestServiceServer_GetMongoDBHealthOk(t *testing.T) {
+	t.Parallel()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	mt, pool, resource := mongodbtestconn.Connect(ctx, 10)
