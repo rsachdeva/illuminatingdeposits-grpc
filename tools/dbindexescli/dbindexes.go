@@ -14,7 +14,7 @@ import (
 func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	mt := mongodbconn.ConnectMongoDB(ctx, 10)
+	mt := mongodbconn.Connect(ctx, 10)
 	mdb := mt.Database("depositsmongodb")
 	coll := mdb.Collection("user")
 
@@ -27,5 +27,5 @@ func main() {
 		log.Fatal("err in index creation with CreateOne is ", err)
 	}
 	log.Println("Index created with name", name)
-	mongodbconn.DisconnectMongodb(ctx, mt)
+	mongodbconn.Disconnect(ctx, mt)
 }

@@ -121,7 +121,7 @@ Check version using command:
 openssl version
 ```
 
-### Troubleshooting
+# Troubleshooting
 If for any reason no connection is happening from client to server or client hangs or server start up issues:
 Run 
 ```
@@ -133,5 +133,15 @@ ps aux | grep "go_build"
 ```
 to confirm is something else is already running
 
+# Running Integration and Unit tests
+```shell 
+go test -v -count=1 ./...
+``` 
+
+Though auto removed, in case any docker containers still running use
+
+```shell 
+docker stop $(docker ps -qa)
+```
 # Version
-v2.21
+v2.23

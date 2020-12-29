@@ -30,7 +30,7 @@ func serveWithShutdown(ctx context.Context, s *grpc.Server, lis net.Listener, mt
 }
 
 func quitGracefully(ctx context.Context, s *grpc.Server, lis net.Listener, mt *mongo.Client) {
-	mongodbconn.DisconnectMongodb(ctx, mt)
+	mongodbconn.Disconnect(ctx, mt)
 	log.Println("Stopping the server...")
 	s.Stop()
 	log.Println("Closing the listener...")

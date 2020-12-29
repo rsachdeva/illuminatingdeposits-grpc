@@ -33,7 +33,7 @@ func main() {
 	log.Println("Starting ServiceServer...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	mt := mongodbconn.ConnectMongoDB(ctx, 10)
+	mt := mongodbconn.Connect(ctx, 10)
 	mdb := mt.Database("depositsmongodb")
 	lis, err := net.Listen("tcp", address)
 	if err != nil {
@@ -48,7 +48,7 @@ func main() {
 	s := grpc.NewServer(opts...)
 	log.Println("Registering gRPC proto MongoDBHealthService...")
 	mongodbhealthpb.RegisterMongoDbHealthServiceServer(s, mongodbhealth.ServiceServer{
-		Mct: mongodbconn.ConnectMongoDB(ctx, 2),
+		Mct: mongodbconn.Connect(ctx, 2),
 	})
 	log.Println("Registering gRPC proto UserMgmtService...")
 	usermgmtpb.RegisterUserMgmtServiceServer(s, usermgmt.ServiceServer{

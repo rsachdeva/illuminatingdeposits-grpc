@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func ConnectMongoDB(ctx context.Context, timeoutSec int) *mongo.Client {
+func Connect(ctx context.Context, timeoutSec int) *mongo.Client {
 	uri := "mongodb://127.0.0.1:27017"
 	if host, ok := os.LookupEnv("DEPOSITS_GRPC_DB_HOST"); ok {
 		uri = fmt.Sprintf("mongodb://%v:27017", host)
@@ -33,7 +33,7 @@ func ConnectMongoDB(ctx context.Context, timeoutSec int) *mongo.Client {
 	return mt
 }
 
-func DisconnectMongodb(ctx context.Context, mt *mongo.Client) {
+func Disconnect(ctx context.Context, mt *mongo.Client) {
 	log.Println("disconnecting from mongodb")
 	fmt.Println("Closing MongoDB Connection...")
 	if err := mt.Disconnect(ctx); err != nil {
