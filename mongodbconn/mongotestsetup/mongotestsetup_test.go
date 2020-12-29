@@ -24,3 +24,15 @@ func ExampleConnect() {
 	// Connected mongo client Pinged again check, errors: <nil>
 	// Purged
 }
+
+func ExampleConnect_nocleanup() {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	mt, _, _ := Connect(ctx, 10)
+	fmt.Println("Connected mongo client Pinged again check, errors:", mt.Ping(ctx, readpref.Primary()))
+	fmt.Println("Not purged; manually delete, errors:", mt.Ping(ctx, readpref.Primary()))
+
+	// Output:
+	// Connected mongo client Pinged again check, errors: <nil>
+	// Not purged; manually delete, errors: <nil>
+}

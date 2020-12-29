@@ -20,7 +20,7 @@ func Connect(ctx context.Context, timeoutSec int) (*mongo.Client, *dockertest.Po
 		log.Fatalf("Could not connect to docker: %s", err)
 	}
 
-	resource, err := pool.Run("mongo", "4.4.2", nil)
+	resource, err := pool.Run("mongo", "4.4.2-bionic", nil)
 	if err != nil {
 		log.Fatalf("Could not connect to docker: %v", err)
 	}

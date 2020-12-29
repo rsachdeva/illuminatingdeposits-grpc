@@ -135,13 +135,26 @@ to confirm is something else is already running
 
 # Running Integration and Unit tests
 ```shell 
+go test -v ./...
+``` 
+The -count=1 is mainly to not use caching and can be added as follows if needed for 
+any go test command:
+```shell 
 go test -v -count=1 ./...
+```
+There are Example tests also. An individual test can be run along the lines of:
+```shell 
+go test -v -run=ExampleConnect_nocleanup ./...
 ``` 
 
-Though auto removed, in case any docker containers still running use
+
+Docker containers are mostly auto removed.
+There could be a container to inspect data.
+In case any docker containers still running after tests:
 
 ```shell 
 docker stop $(docker ps -qa)
+docker rm -f $(docker ps -qa)
 ```
 # Version
 v2.23
