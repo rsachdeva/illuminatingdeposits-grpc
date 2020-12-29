@@ -135,8 +135,12 @@ to confirm is something else is already running
 
 # Running Integration/Unit tests
 ```shell 
-go test -v ./...
+docker pull mongo:4.4.2-bionic (only once as tests use this image; so faster)
 ``` 
+and then do:
+```shell
+go test -v ./... 
+```
 The -count=1 is mainly to not use caching and can be added as follows if needed for 
 any go test command:
 ```shell 
@@ -172,6 +176,10 @@ In grep -v means "invert the match" in grep, in other words, return all non-matc
 go test -v -coverprofile cover.out $(go list ./... | grep -v mongodbconn) && go tool cover -func cover.out
 go test -v -coverprofile cover.out $(go list ./... | grep -v mongodbconn) && go tool cover -html cover.out
 ```
+Single package:
+```shell 
+go test -v -coverprofile cover.out ./mongodbhealth && go tool cover -func cover.out
+```
 See Editor specifcs to see Covered Parts in the Editor.
 Docker containers are mostly auto removed.
 There could be a container to inspect data.
@@ -182,4 +190,4 @@ docker stop $(docker ps -qa)
 docker rm -f $(docker ps -qa)
 ```
 # Version
-v2.27
+v2.28

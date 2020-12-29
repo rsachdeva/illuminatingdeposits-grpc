@@ -15,7 +15,6 @@ import (
 
 // Basaed on Dockertest
 func Connect(ctx context.Context, timeoutSec int) (*mongo.Client, *dockertest.Pool, *dockertest.Resource) {
-
 	pool, err := dockertest.NewPool("")
 	if err != nil {
 		log.Fatalf("Could not connect to docker: %s", err)

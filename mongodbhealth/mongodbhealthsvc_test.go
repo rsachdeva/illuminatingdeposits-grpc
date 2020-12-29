@@ -54,7 +54,7 @@ func TestServiceServer_GetMongoDBHealthOk(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
-	mt, pool, resource := mongodbtestconn.Connect(ctx, 50)
+	mt, pool, resource := mongodbtestconn.Connect(ctx, 1)
 	address := "localhost:50053"
 	initGRPCServerHTTP2(t, mt, address) // Starting a conventional gRPC server runs on HTTP2
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
@@ -86,7 +86,7 @@ func TestServiceServer_GetMongoDBHealthNotOk(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
-	mt, pool, resource := mongodbtestconn.Connect(ctx, 50)
+	mt, pool, resource := mongodbtestconn.Connect(ctx, 1)
 	address := "localhost:50054"
 	initGRPCServerHTTP2(t, mt, address) // Starting a conventional gRPC server runs on HTTP2
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
