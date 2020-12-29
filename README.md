@@ -133,7 +133,7 @@ ps aux | grep "go_build"
 ```
 to confirm is something else is already running
 
-# Running Integration and Unit tests
+# Running Integration/Unit tests
 ```shell 
 go test -v ./...
 ``` 
@@ -146,8 +146,27 @@ There are Example tests also. An individual test can be run along the lines of:
 ```shell 
 go test -v -run=ExampleConnect_nocleanup ./...
 ``` 
-
-
+For coverage for per package:
+```shell
+go test -cover ./...
+```
+To see coverage stats in more detail:
+```shell 
+go test -v -coverprofile cover.out ./...
+```
+To see overall total coverage
+```shell 
+go tool cover -func=cover.out
+```
+or
+```shell 
+go tool cover -func cover.out
+```
+To see in the browser the covered parts:
+```shell 
+go tool cover -html cover.out
+```
+See Editor specifcs to see Covered Parts in the Editor.
 Docker containers are mostly auto removed.
 There could be a container to inspect data.
 In case any docker containers still running after tests:
@@ -157,4 +176,4 @@ docker stop $(docker ps -qa)
 docker rm -f $(docker ps -qa)
 ```
 # Version
-v2.23
+v2.25
