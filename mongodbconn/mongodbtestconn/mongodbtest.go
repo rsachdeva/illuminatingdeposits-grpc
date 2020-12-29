@@ -1,4 +1,5 @@
-package mongotestsetup
+// Provides mongodb connection for tests only
+package mongodbtestconn
 
 import (
 	"context"

@@ -1,4 +1,4 @@
-package mongotestsetup
+package mongodbtestconn
 
 import (
 	"context"

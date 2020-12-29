@@ -166,6 +166,11 @@ To see in the browser the covered parts:
 ```shell 
 go tool cover -html cover.out
 ```
+To run tests with coverage and see reports in single command combine them as:
+```shell 
+go test -v -coverprofile cover.out ./... && go tool cover -func cover.out
+go test -v -coverprofile cover.out ./... && go tool cover -html cover.out
+```
 See Editor specifcs to see Covered Parts in the Editor.
 Docker containers are mostly auto removed.
 There could be a container to inspect data.
@@ -176,4 +181,4 @@ docker stop $(docker ps -qa)
 docker rm -f $(docker ps -qa)
 ```
 # Version
-v2.25
+v2.26
