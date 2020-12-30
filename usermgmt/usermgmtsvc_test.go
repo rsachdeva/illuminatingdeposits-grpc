@@ -13,11 +13,13 @@ import (
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
 	"github.com/stretchr/testify/require"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 )
 
-func initGRPCServerHTTP2(t *testing.T, mt *mongo.Client, address string) {
+func initGRPCServerHTTP2(t *testing.T, address string) {
 	log.SetFlags(log.LstdFlags | log.Ltime | log.Lshortfile)
 	log.Println("Starting ServiceServer...")
 	lis, err := net.Listen("tcp", address)
@@ -27,7 +29,22 @@ func initGRPCServerHTTP2(t *testing.T, mt *mongo.Client, address string) {
 
 	var opts []grpc.ServerOption
 	s := grpc.NewServer(opts...)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+	defer cancel()
+	mt, pool, resource := mongodbtestconn.Connect(ctx, 1)
 	mdb := mt.Database("depositsmongodb")
+	coll := mdb.Collection("user")
+
+	mod := mongo.IndexModel{
+		Keys:    bson.M{"email": 1}, // index in ascending order or -1 for descending order
+		Options: options.Index().SetUnique(true),
+	}
+	name, err := coll.Indexes().CreateOne(ctx, mod)
+	if err != nil {
+		log.Fatal("err in index creation with CreateOne is ", err)
+	}
+	log.Println("Index created with name", name)
 	log.Println("Registering gRPC proto UserMgmtService...")
 	usermgmtpb.RegisterUserMgmtServiceServer(s, usermgmt.ServiceServer{
 		Mdb: mdb,
@@ -45,6 +62,11 @@ func initGRPCServerHTTP2(t *testing.T, mt *mongo.Client, address string) {
 		s.Stop()
 		log.Println("Closing the listener...")
 		lis.Close()
+		fmt.Println("Purging dockertest for mongodb always; unless commented out to examine any data")
+		err = pool.Purge(resource)
+		if err != nil {
+			t.Fatalf("Could not purge container: %v", err)
+		}
 		log.Println("End of program")
 	})
 }
@@ -53,11 +75,8 @@ func initGRPCServerHTTP2(t *testing.T, mt *mongo.Client, address string) {
 func TestServiceServer_CreateUser(t *testing.T) {
 	t.Parallel()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
-	defer cancel()
-	mt, pool, resource := mongodbtestconn.Connect(ctx, 1)
 	address := "localhost:50055"
-	initGRPCServerHTTP2(t, mt, address) // Starting a conventional gRPC server runs on HTTP2
+	initGRPCServerHTTP2(t, address) // Starting a conventional gRPC server runs on HTTP2
 
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
@@ -82,11 +101,16 @@ func TestServiceServer_CreateUser(t *testing.T) {
 	log.Printf("response %s", umresp.User)
 	require.Equal(t, umresp.User.Email, "growth@drinnovations.us")
 
-	t.Cleanup(func() {
-		fmt.Println("Purging dockertest for mongodb always; unless commented out to examine any data")
-		err = pool.Purge(resource)
-		if err != nil {
-			t.Fatalf("Could not purge container: %v", err)
-		}
-	})
+	req = usermgmtpb.CreateUserRequest{
+		NewUser: &usermgmtpb.NewUser{
+			Name:            "Rohit-Sachdeva-User2",
+			Email:           "growth@drinnovations.us",
+			Roles:           []string{"USER"},
+			Password:        "kubernetes2",
+			PasswordConfirm: "kubernetes2",
+		},
+	}
+	_, err = uMgmtSvcClient.CreateUser(context.Background(), &req)
+	fmt.Printf("Again persisting same email err is %v", err)
+	require.NotNil(t, err, "should not create user accounts with duplicate email")
 }
