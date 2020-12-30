@@ -1,3 +1,4 @@
+// Adds tests that starts a gRPC server and client tests the mongodb health service with RPC
 package mongodbhealth_test
 
 import (
@@ -57,6 +58,7 @@ func TestServiceServer_GetMongoDBHealthOk(t *testing.T) {
 	mt, pool, resource := mongodbtestconn.Connect(ctx, 1)
 	address := "localhost:50053"
 	initGRPCServerHTTP2(t, mt, address) // Starting a conventional gRPC server runs on HTTP2
+
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -64,13 +66,11 @@ func TestServiceServer_GetMongoDBHealthOk(t *testing.T) {
 	defer conn.Close()
 	mdbSvcClient := mongodbhealthpb.NewMongoDbHealthServiceClient(conn)
 	mdbresp, err := mdbSvcClient.GetMongoDBHealth(context.Background(), &emptypb.Empty{})
-
 	if err != nil {
 		log.Fatalf("Could not check Mongodb status: %v", err)
 	}
 	log.Printf("response %s", mdbresp.Health)
 	require.Equal(t, mdbresp.Health.Status, "MongoDb Ok")
-
 	t.Cleanup(func() {
 		fmt.Println("Purging dockertest for mongodb always; unless commented out to examine any data")
 		err = pool.Purge(resource)
@@ -89,18 +89,17 @@ func TestServiceServer_GetMongoDBHealthNotOk(t *testing.T) {
 	mt, pool, resource := mongodbtestconn.Connect(ctx, 1)
 	address := "localhost:50054"
 	initGRPCServerHTTP2(t, mt, address) // Starting a conventional gRPC server runs on HTTP2
+
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
 	mdbSvcClient := mongodbhealthpb.NewMongoDbHealthServiceClient(conn)
-
 	err = pool.Purge(resource)
 	if err != nil {
 		t.Fatalf("Could not purge container: %v", err)
 	}
-
 	mdbresp, err := mdbSvcClient.GetMongoDBHealth(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		log.Fatalf("Could not check Mongodb status: %v", err)
