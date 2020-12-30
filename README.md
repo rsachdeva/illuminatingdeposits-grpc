@@ -59,6 +59,10 @@ docker-compose -f ./deploy/compose/docker-compose.dbindexes.yml up --build
 Make sure DEPOSITS_GRPC_SERVICE_TLS=false in docker-compose.grpc.server.yml
 ### To start all services with TLS:
 Make sure DEPOSITS_GRPC_SERVICE_TLS=true in docker-compose.grpc.server.yml
+InterestCal service only supports TLS in gRPC as it carries access token.
+This means users want to transmit security
+information (e.g., OAuth2 token) which requires secure connection.Otherwise will see error as:
+the credentials require transport level security (use grpc.WithTransportCredentials() to set).
 ### And then execute:
 ```shell
 export COMPOSE_IGNORE_ORPHANS=True && \

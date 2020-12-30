@@ -58,8 +58,8 @@ func nonAccessTokenRequests(conn *grpc.ClientConn, email string) {
 }
 
 func accessTokenRequiredRequests(oaToken *oauth2.Token, opts []grpc.DialOption) {
-	perRPC := oauth.NewOauthAccess(oaToken)
-	opts = append(opts, grpc.WithPerRPCCredentials(perRPC))
+	oAccess := oauth.NewOauthAccess(oaToken)
+	opts = append(opts, grpc.WithPerRPCCredentials(oAccess))
 	for _, v := range opts {
 		fmt.Printf("Opts v type is %T and val is %v\n", v, v)
 	}
@@ -118,9 +118,9 @@ func requestCreateUser(conn *grpc.ClientConn, email string) {
 
 }
 
-func requestCreateInterest(conn *grpc.ClientConn) {
+func requestCreateInterest(connWithToken *grpc.ClientConn) {
 	fmt.Println("executing requestCreateInterest")
-	iCalSvcClient := interestcalpb.NewInterestCalServiceClient(conn)
+	iCalSvcClient := interestcalpb.NewInterestCalServiceClient(connWithToken)
 	fmt.Printf("iCalSvcClient client created")
 
 	req := interestcalpb.CreateInterestRequest{

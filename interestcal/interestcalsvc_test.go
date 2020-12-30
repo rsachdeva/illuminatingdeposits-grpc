@@ -1,4 +1,4 @@
-package userauthn_test
+package interestcal_test
 
 import (
 	"context"
@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn/mongodbtestconn"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn/userauthnpb"
@@ -17,7 +19,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/oauth"
 )
 
 func initGRPCServerHTTP2(t *testing.T, address string) {
@@ -28,8 +32,7 @@ func initGRPCServerHTTP2(t *testing.T, address string) {
 		log.Fatalf("could not listen %v", err)
 	}
 
-	var opts []grpc.ServerOption
-	s := grpc.NewServer(opts...)
+	s := grpc.NewServer(grpc.UnaryInterceptor(userauthn.EnsureValidToken))
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
@@ -54,6 +57,8 @@ func initGRPCServerHTTP2(t *testing.T, address string) {
 	userauthnpb.RegisterUserAuthnServiceServer(s, userauthn.ServiceServer{
 		Mdb: mdb,
 	})
+	log.Println("Registering gRPC proto InterestCalService...")
+	interestcalpb.RegisterInterestCalServiceServer(s, interestcal.ServiceServer{})
 
 	log.Println("Ready to Serve now")
 	go func() {
@@ -76,12 +81,13 @@ func initGRPCServerHTTP2(t *testing.T, address string) {
 	})
 }
 
-func TestServiceServer_CreateToken(t *testing.T) {
+func TestServiceServer_CreateInterest(t *testing.T) {
 	t.Parallel()
 
-	address := "localhost:50056"
+	address := "localhost:50058"
 	initGRPCServerHTTP2(t, address) // Starting a conventional gRPC server runs on HTTP2
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	opts := []grpc.DialOption{grpc.WithInsecure()}
+	conn, err := grpc.Dial(address, opts...)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
@@ -106,63 +112,104 @@ func TestServiceServer_CreateToken(t *testing.T) {
 	log.Printf("response %s", umresp.User)
 
 	uAuthnSvcClient := userauthnpb.NewUserAuthnServiceClient(conn)
-	fmt.Println("uAuthnSvcClient client created")
-
+	t.Log("uAuthnSvcClient client created")
 	ctreq := userauthnpb.CreateTokenRequest{
 		VerifyUser: &userauthnpb.VerifyUser{
 			Email:    email,
 			Password: password,
 		},
 	}
-
 	uaresp, err := uAuthnSvcClient.CreateToken(context.Background(), &ctreq)
 	require.Nil(t, err, "Error should be nil when creating accessToken")
-	require.NotNil(t, uaresp, "Response should not be nil")
 	accessToken := uaresp.VerifiedUser.AccessToken
 	t.Logf("access accessToken is %v", accessToken)
-	require.NotNil(t, accessToken, "Access accessToken should not be nil")
-}
 
-func TestServiceServer_CreateTokenNotAllowed(t *testing.T) {
-	t.Parallel()
+	oaToken := oauth2.Token{
+		AccessToken: accessToken,
+		// https://stackoverflow.com/questions/34013299/web-api-authentication-basic-vs-bearer
+		TokenType: "Bearer",
+	}
 
-	address := "localhost:50057"
-	initGRPCServerHTTP2(t, address) // Starting a conventional gRPC server runs on HTTP2
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	oAccess := oauth.NewOauthAccess(&oaToken)
+	opts = append(opts, grpc.WithPerRPCCredentials(oAccess))
+	for _, v := range opts {
+		fmt.Printf("Opts v type is %T and val is %v\n", v, v)
+	}
+	connWithToken, err := grpc.Dial(address, opts...)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
-	defer conn.Close()
-	email := "growth@drinnovations.us"
-	password := "kubernetes"
-	uMgmtSvcClient := usermgmtpb.NewUserMgmtServiceClient(conn)
-	fmt.Println("uMgmtSvcClient client created")
-	cureq := usermgmtpb.CreateUserRequest{
-		NewUser: &usermgmtpb.NewUser{
-			Name:            "Rohit-Sachdeva-User",
-			Email:           email,
-			Roles:           []string{"USER"},
-			Password:        password,
-			PasswordConfirm: password,
+	defer connWithToken.Close()
+
+	req := interestcalpb.CreateInterestRequest{
+		// &interestcalpb.NewBank is reduntant type
+		// []*interestcalpb.NewBank{&interestcalpb.NewBank{ changed to []*interestcalpb.NewBank{{
+		NewBanks: []*interestcalpb.NewBank{
+			{
+				Name: "HAPPIEST",
+				NewDeposits: []*interestcalpb.NewDeposit{
+					{
+						Account:     "1234",
+						AccountType: "Checking",
+						Apy:         0,
+						Years:       1,
+						Amount:      100,
+					},
+					{
+						Account:     "1256",
+						AccountType: "CD",
+						Apy:         24,
+						Years:       2,
+						Amount:      10700,
+					},
+					{
+						Account:     "1111",
+						AccountType: "CD",
+						Apy:         1.01,
+						Years:       10,
+						Amount:      27000,
+					},
+				},
+			},
+			{
+				Name: "NICE",
+				NewDeposits: []*interestcalpb.NewDeposit{
+					{
+						Account:     "1234",
+						AccountType: "Brokered CD",
+						Apy:         2.4,
+						Years:       7,
+						Amount:      10990,
+					},
+				},
+			},
+			{
+				Name: "ANGRY",
+				NewDeposits: []*interestcalpb.NewDeposit{
+					{
+						Account:     "1234",
+						AccountType: "Brokered CD",
+						Apy:         5,
+						Years:       7,
+						Amount:      10990,
+					},
+					{
+						Account:     "9898",
+						AccountType: "CD",
+						Apy:         2.22,
+						Years:       1,
+						Amount:      5500,
+					},
+				},
+			},
 		},
 	}
-	umresp, err := uMgmtSvcClient.CreateUser(context.Background(), &cureq)
+	iCalSvcClient := interestcalpb.NewInterestCalServiceClient(connWithToken)
+	t.Log("iCalSvcClient client created")
+	// endpoint CreateInterest method in InterestCalculationService
+	ciresp, err := iCalSvcClient.CreateInterest(context.Background(), &req)
 	if err != nil {
-		log.Println("error calling CreateUser service", err)
+		t.Log("error calling CreateInterest service", err)
 	}
-	log.Printf("response %s", umresp.User)
-	require.Equal(t, umresp.User.Email, "growth@drinnovations.us")
-
-	uAuthnSvcClient := userauthnpb.NewUserAuthnServiceClient(conn)
-	fmt.Println("uAuthnSvcClient client created")
-
-	ctreq := userauthnpb.CreateTokenRequest{
-		VerifyUser: &userauthnpb.VerifyUser{
-			Email:    email,
-			Password: "wrong",
-		},
-	}
-
-	_, err = uAuthnSvcClient.CreateToken(context.Background(), &ctreq)
-	require.NotNil(t, err, "Error should not be nil when creating token with incorrect password")
+	t.Logf("\nciresp is %+v", ciresp)
 }

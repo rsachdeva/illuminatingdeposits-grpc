@@ -10,6 +10,7 @@ import (
 func TlsEnabled() bool {
 	var enabled bool
 	var err error
+	// change DEPOSITS_GRPC_SERVICE_TLS env variable in command line or editor
 	enabled = true
 	if tlsAllowed, ok := os.LookupEnv("DEPOSITS_GRPC_SERVICE_TLS"); ok {
 		fmt.Println("tlsAllowed from env is", tlsAllowed)
