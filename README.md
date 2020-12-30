@@ -140,6 +140,7 @@ to confirm is something else is already running
 # Running Integration/Unit tests
 ```shell 
 docker pull mongo:4.4.2-bionic (only once as tests use this image; so faster)
+export GODEBUG=x509ignoreCN=0
 ``` 
 and then do:
 ```shell
@@ -194,4 +195,4 @@ And if mongodb not connecting for tests: (reference: https://www.xspdf.com/help/
 docker volume rm $(docker volume ls -qf dangling=true)
 ```
 # Version
-v2.35
+v2.36

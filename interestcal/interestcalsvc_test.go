@@ -11,6 +11,7 @@ import (
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn/mongodbtestconn"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/testcredentials"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn/userauthnpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt"
@@ -23,7 +24,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/oauth"
-	"google.golang.org/grpc/testdata"
 )
 
 func initGRPCServerHTTP2(t *testing.T, address string) {
@@ -91,7 +91,7 @@ func TestServiceServer_CreateInterest(t *testing.T) {
 
 	address := "localhost:50058"
 	initGRPCServerHTTP2(t, address) // Starting a conventional gRPC server runs on HTTP2
-	opts := []grpc.DialOption{clientTlsOption()}
+	opts := []grpc.DialOption{clientTlsOption(t)}
 	conn, err := grpc.Dial(address, opts...)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -216,12 +216,15 @@ func TestServiceServer_CreateInterest(t *testing.T) {
 	if err != nil {
 		t.Log("error calling CreateInterest service", err)
 	}
-	t.Logf("\nciresp is %+v", ciresp)
+	t.Logf("ciresp is %+v", ciresp)
+	require.Equal(t, ciresp.Banks[0].Deposits[2].Delta, 23.46, "delta for a deposit in a bank must match")
+	require.Equal(t, ciresp.Banks[0].Delta, 259.86, "delta for a bank must match")
+	require.Equal(t, ciresp.Delta, 336.74, "overall delta for all deposists in all banks must match")
 }
 
 func serverTlsOption(opts []grpc.ServerOption) []grpc.ServerOption {
-	certFile := testdata.Path("./tls/servercrtto.pem")
-	keyFile := testdata.Path("./tls/serverkeyto.pem")
+	certFile := testcredentials.Path("tls/servercrtto.pem")
+	keyFile := testcredentials.Path("tls/serverkeyto.pem")
 	creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
 	if err != nil {
 		log.Fatalf("tls error failed loading certificates %v", err)
@@ -230,8 +233,9 @@ func serverTlsOption(opts []grpc.ServerOption) []grpc.ServerOption {
 	return opts
 }
 
-func clientTlsOption() grpc.DialOption {
-	certFile := testdata.Path("./tls/cacrtto.pem")
+// export GODEBUG=x509ignoreCN=0
+func clientTlsOption(t *testing.T) grpc.DialOption {
+	certFile := testcredentials.Path("tls/cacrtto.pem")
 	creds, err := credentials.NewClientTLSFromFile(certFile, "")
 	if err != nil {
 		log.Fatalf("loading certificate error is %v", err)
