@@ -146,10 +146,6 @@ any go test command:
 ```shell 
 go test -v -count=1 ./...
 ```
-There are Example tests also. An individual test can be run along the lines of:
-```shell 
-go test -v -run=ExampleConnect_nocleanup ./...
-``` 
 For coverage for per package:
 ```shell
 go test -cover ./...
@@ -170,12 +166,6 @@ To see in the browser the covered parts:
 ```shell 
 go tool cover -html cover.out
 ```
-To run tests with coverage and see reports in excluding certain packages not needed:
-In grep -v means "invert the match" in grep, in other words, return all non-matching lines
-```shell 
-go test -v -coverprofile cover.out $(go list ./... | grep -v mongodbconn) && go tool cover -func cover.out
-go test -v -coverprofile cover.out $(go list ./... | grep -v mongodbconn) && go tool cover -html cover.out
-```
 Single package:
 ```shell 
 go test -v -coverprofile cover.out ./mongodbhealth && go tool cover -func cover.out
@@ -190,4 +180,4 @@ docker stop $(docker ps -qa)
 docker rm -f $(docker ps -qa)
 ```
 # Version
-v2.30
+v2.32

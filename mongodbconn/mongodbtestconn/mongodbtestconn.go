@@ -25,6 +25,7 @@ func Connect(ctx context.Context, timeoutSec int) (*mongo.Client, *dockertest.Po
 		log.Fatalf("Could not connect to docker: %v", err)
 	}
 	var mt *mongo.Client
+	pool.MaxWait = 3 * time.Second
 	if err := pool.Retry(func() error {
 		uri := fmt.Sprintf("mongodb://localhost:%s", resource.GetPort("27017/tcp"))
 		log.Printf("uri is %v", uri)
@@ -32,12 +33,9 @@ func Connect(ctx context.Context, timeoutSec int) (*mongo.Client, *dockertest.Po
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		// Ping the primary
-		// err = mt.Ping(ctx, readpref.Primary())
-		// log.Printf("Pinging response is %v", err)
-		// return err
-		return mt.Ping(ctx, readpref.Primary())
+		err = mt.Ping(ctx, readpref.Primary())
+		log.Printf("err when pinging for connection setup %v", err)
+		return err
 	}); err != nil {
 		log.Fatalf("Could not connect to docker: %s", err)
 	}

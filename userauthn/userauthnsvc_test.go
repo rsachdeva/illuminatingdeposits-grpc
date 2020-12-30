@@ -1,5 +1,4 @@
-// Adds test that starts a gRPC server and client tests the user mgmt service with RPC
-package usermgmt_test
+package userauthn_test
 
 import (
 	"context"
@@ -10,6 +9,8 @@ import (
 	"time"
 
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn/mongodbtestconn"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn/userauthnpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
 	"github.com/stretchr/testify/require"
@@ -49,6 +50,10 @@ func initGRPCServerHTTP2(t *testing.T, address string) {
 	usermgmtpb.RegisterUserMgmtServiceServer(s, usermgmt.ServiceServer{
 		Mdb: mdb,
 	})
+	log.Println("Registering gRPC proto UserAuthenticationService...")
+	userauthnpb.RegisterUserAuthnServiceServer(s, userauthn.ServiceServer{
+		Mdb: mdb,
+	})
 
 	log.Println("Ready to Serve now")
 	go func() {
@@ -71,45 +76,94 @@ func initGRPCServerHTTP2(t *testing.T, address string) {
 	})
 }
 
-func TestServiceServer_CreateUser(t *testing.T) {
+func TestServiceServer_CreateToken(t *testing.T) {
 	t.Parallel()
 
-	address := "localhost:50055"
+	address := "localhost:50056"
 	initGRPCServerHTTP2(t, address) // Starting a conventional gRPC server runs on HTTP2
-
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
+	email := "growth@drinnovations.us"
+	password := "kubernetes"
 	uMgmtSvcClient := usermgmtpb.NewUserMgmtServiceClient(conn)
 	fmt.Println("uMgmtSvcClient client created")
-	req := usermgmtpb.CreateUserRequest{
+	cureq := usermgmtpb.CreateUserRequest{
 		NewUser: &usermgmtpb.NewUser{
 			Name:            "Rohit-Sachdeva-User",
-			Email:           "growth@drinnovations.us",
+			Email:           email,
 			Roles:           []string{"USER"},
-			Password:        "kubernetes",
-			PasswordConfirm: "kubernetes",
+			Password:        password,
+			PasswordConfirm: password,
 		},
 	}
-	umresp, err := uMgmtSvcClient.CreateUser(context.Background(), &req)
+	umresp, err := uMgmtSvcClient.CreateUser(context.Background(), &cureq)
 	if err != nil {
 		log.Println("error calling CreateUser service", err)
 	}
 	log.Printf("response %s", umresp.User)
 	require.Equal(t, umresp.User.Email, "growth@drinnovations.us")
 
-	req = usermgmtpb.CreateUserRequest{
-		NewUser: &usermgmtpb.NewUser{
-			Name:            "Rohit-Sachdeva-User2",
-			Email:           "growth@drinnovations.us",
-			Roles:           []string{"USER"},
-			Password:        "kubernetes2",
-			PasswordConfirm: "kubernetes2",
+	uAuthnSvcClient := userauthnpb.NewUserAuthnServiceClient(conn)
+	fmt.Println("uAuthnSvcClient client created")
+
+	ctreq := userauthnpb.CreateTokenRequest{
+		VerifyUser: &userauthnpb.VerifyUser{
+			Email:    email,
+			Password: password,
 		},
 	}
-	_, err = uMgmtSvcClient.CreateUser(context.Background(), &req)
-	fmt.Printf("Again persisting same email err is %v", err)
-	require.NotNil(t, err, "should not create user accounts with duplicate email")
+
+	uaresp, err := uAuthnSvcClient.CreateToken(context.Background(), &ctreq)
+	require.Nil(t, err, "Error should be nil when creating token")
+	require.NotNil(t, uaresp, "Response should not be nil")
+	token := uaresp.VerifiedUser.AccessToken
+	t.Logf("access token is %v", token)
+	require.NotNil(t, token, "Access token should not be nil")
+}
+
+func TestServiceServer_CreateTokenNotAllowed(t *testing.T) {
+	t.Parallel()
+
+	address := "localhost:50057"
+	initGRPCServerHTTP2(t, address) // Starting a conventional gRPC server runs on HTTP2
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	email := "growth@drinnovations.us"
+	password := "kubernetes"
+	uMgmtSvcClient := usermgmtpb.NewUserMgmtServiceClient(conn)
+	fmt.Println("uMgmtSvcClient client created")
+	cureq := usermgmtpb.CreateUserRequest{
+		NewUser: &usermgmtpb.NewUser{
+			Name:            "Rohit-Sachdeva-User",
+			Email:           email,
+			Roles:           []string{"USER"},
+			Password:        password,
+			PasswordConfirm: password,
+		},
+	}
+	umresp, err := uMgmtSvcClient.CreateUser(context.Background(), &cureq)
+	if err != nil {
+		log.Println("error calling CreateUser service", err)
+	}
+	log.Printf("response %s", umresp.User)
+	require.Equal(t, umresp.User.Email, "growth@drinnovations.us")
+
+	uAuthnSvcClient := userauthnpb.NewUserAuthnServiceClient(conn)
+	fmt.Println("uAuthnSvcClient client created")
+
+	ctreq := userauthnpb.CreateTokenRequest{
+		VerifyUser: &userauthnpb.VerifyUser{
+			Email:    email,
+			Password: "wrong",
+		},
+	}
+
+	_, err = uAuthnSvcClient.CreateToken(context.Background(), &ctreq)
+	require.NotNil(t, err, "Error should not be nil when creating token with incorrect password")
 }

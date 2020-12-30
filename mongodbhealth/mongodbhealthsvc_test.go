@@ -53,7 +53,7 @@ func initGRPCServerHTTP2(t *testing.T, mt *mongo.Client, address string) {
 func TestServiceServer_GetMongoDBHealthOk(t *testing.T) {
 	t.Parallel()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	mt, pool, resource := mongodbtestconn.Connect(ctx, 1)
 	address := "localhost:50053"
