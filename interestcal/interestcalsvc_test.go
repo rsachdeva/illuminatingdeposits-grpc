@@ -21,7 +21,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/oauth"
+	"google.golang.org/grpc/testdata"
 )
 
 func initGRPCServerHTTP2(t *testing.T, address string) {
@@ -32,7 +34,10 @@ func initGRPCServerHTTP2(t *testing.T, address string) {
 		log.Fatalf("could not listen %v", err)
 	}
 
-	s := grpc.NewServer(grpc.UnaryInterceptor(userauthn.EnsureValidToken))
+	var opts []grpc.ServerOption
+	opts = serverTlsOption(opts)
+	opts = append(opts, grpc.UnaryInterceptor(userauthn.EnsureValidToken))
+	s := grpc.NewServer(opts...)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
@@ -86,7 +91,7 @@ func TestServiceServer_CreateInterest(t *testing.T) {
 
 	address := "localhost:50058"
 	initGRPCServerHTTP2(t, address) // Starting a conventional gRPC server runs on HTTP2
-	opts := []grpc.DialOption{grpc.WithInsecure()}
+	opts := []grpc.DialOption{clientTlsOption()}
 	conn, err := grpc.Dial(address, opts...)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -212,4 +217,25 @@ func TestServiceServer_CreateInterest(t *testing.T) {
 		t.Log("error calling CreateInterest service", err)
 	}
 	t.Logf("\nciresp is %+v", ciresp)
+}
+
+func serverTlsOption(opts []grpc.ServerOption) []grpc.ServerOption {
+	certFile := testdata.Path("./tls/servercrtto.pem")
+	keyFile := testdata.Path("./tls/serverkeyto.pem")
+	creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
+	if err != nil {
+		log.Fatalf("tls error failed loading certificates %v", err)
+	}
+	opts = []grpc.ServerOption{grpc.Creds(creds)}
+	return opts
+}
+
+func clientTlsOption() grpc.DialOption {
+	certFile := testdata.Path("./tls/cacrtto.pem")
+	creds, err := credentials.NewClientTLSFromFile(certFile, "")
+	if err != nil {
+		log.Fatalf("loading certificate error is %v", err)
+	}
+	opt := grpc.WithTransportCredentials(creds)
+	return opt
 }
