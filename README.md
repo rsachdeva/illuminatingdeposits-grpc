@@ -170,6 +170,12 @@ Single package:
 ```shell 
 go test -v -coverprofile cover.out ./mongodbhealth && go tool cover -func cover.out
 ```
+To run tests with coverage and see reports in excluding certain packages not needed:
+In grep -v means "invert the match" in grep, in other words, return all non-matching lines
+```shell 
+go test -v -count=1 -coverprofile cover.out $(go list ./... | grep -v mongodbconn | grep -v pb) && go tool cover -func cover.out
+go test -v -count=1 -coverprofile cover.out $(go list ./... | grep -v mongodbconn) && go tool cover -html cover.out
+```
 See Editor specifcs to see Covered Parts in the Editor.
 Docker containers are mostly auto removed.
 There could be a container to inspect data.
@@ -179,5 +185,9 @@ In case any docker containers still running after tests:
 docker stop $(docker ps -qa)
 docker rm -f $(docker ps -qa)
 ```
+And if mongodb not connecting for tests: (reference: https://www.xspdf.com/help/52284027.html)
+```shell 
+docker volume rm $(docker volume ls -qf dangling=true)
+```
 # Version
-v2.32
+v2.33

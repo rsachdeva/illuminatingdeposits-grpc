@@ -21,11 +21,14 @@ func Connect(ctx context.Context, timeoutSec int) (*mongo.Client, *dockertest.Po
 	}
 
 	resource, err := pool.Run("mongo", "4.4.2-bionic", nil)
+	log.Println("resource is", resource.Container.Config)
+	log.Println("resource hostport is", resource.GetHostPort("27017/tcp"))
+	log.Println("err ir ", err)
 	if err != nil {
 		log.Fatalf("Could not connect to docker: %v", err)
 	}
 	var mt *mongo.Client
-	pool.MaxWait = 3 * time.Second
+	//pool.MaxWait = 3 * time.Second
 	if err := pool.Retry(func() error {
 		uri := fmt.Sprintf("mongodb://localhost:%s", resource.GetPort("27017/tcp"))
 		log.Printf("uri is %v", uri)

@@ -9,10 +9,10 @@ import (
 )
 
 func ExampleConnect() {
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	_, pool, resource := mongodbtestconn.Connect(ctx, 1)
 
+	_, pool, resource := mongodbtestconn.Connect(ctx, 10)
 	err := pool.Purge(resource)
 	fmt.Println("err is", err)
 	// Output:
