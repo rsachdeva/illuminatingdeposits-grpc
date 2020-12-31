@@ -4,94 +4,28 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net"
 	"testing"
 	"time"
 
-	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
-	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn/mongodbconntest"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/testcredentials"
-	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/testserver"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn/userauthnpb"
-	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
 	"github.com/stretchr/testify/require"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/oauth"
 )
 
-func initGRPCServerHTTP2(t *testing.T, address string) {
-	log.SetFlags(log.LstdFlags | log.Ltime | log.Lshortfile)
-	log.Println("Starting ServiceServer...")
-	lis, err := net.Listen("tcp", address)
-	if err != nil {
-		log.Fatalf("could not listen %v", err)
-	}
-
-	var opts []grpc.ServerOption
-	opts = testcredentials.ServerTlsOption(opts)
-	opts = append(opts, grpc.UnaryInterceptor(userauthn.EnsureValidToken))
-	s := grpc.NewServer(opts...)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
-	defer cancel()
-	mt, pool, resource := mongodbconntest.Connect(ctx, 1)
-	mdb := mt.Database("depositsmongodb")
-	coll := mdb.Collection("user")
-
-	mod := mongo.IndexModel{
-		Keys:    bson.M{"email": 1}, // index in ascending order or -1 for descending order
-		Options: options.Index().SetUnique(true),
-	}
-	name, err := coll.Indexes().CreateOne(ctx, mod)
-	if err != nil {
-		log.Fatal("err in index creation with CreateOne is ", err)
-	}
-	log.Println("Index created with name", name)
-	log.Println("Registering gRPC proto UserMgmtService...")
-	usermgmtpb.RegisterUserMgmtServiceServer(s, usermgmt.ServiceServer{
-		Mdb: mdb,
-	})
-	log.Println("Registering gRPC proto UserAuthenticationService...")
-	userauthnpb.RegisterUserAuthnServiceServer(s, userauthn.ServiceServer{
-		Mdb: mdb,
-	})
-	log.Println("Registering gRPC proto InterestCalService...")
-	interestcalpb.RegisterInterestCalServiceServer(s, interestcal.ServiceServer{})
-
-	log.Println("Ready to Serve now")
-	go func() {
-		if err := s.Serve(lis); err != nil {
-			log.Fatalf("error is %#v", err)
-		}
-	}()
-
-	t.Cleanup(func() {
-		log.Println("Stopping the server...")
-		s.Stop()
-		log.Println("Closing the listener...")
-		lis.Close()
-		fmt.Println("Purging dockertest for mongodb always; unless commented out to examine any data")
-		err = pool.Purge(resource)
-		if err != nil {
-			t.Fatalf("Could not purge container: %v", err)
-		}
-		log.Println("End of program")
-	})
-}
-
 func TestServiceServer_CreateInterest(t *testing.T) {
 	t.Parallel()
 
-	address := "localhost:50058"
-	initGRPCServerHTTP2(t, address) // Starting a conventional gRPC server runs on HTTP2
-	opts := []grpc.DialOption{testcredentials.ClientTlsOption(t)}
-	conn, err := grpc.Dial(address, opts...)
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+	defer cancel()
+	listener := testserver.InitGRPCServerBuffConn(ctx, t)
+	opts := []grpc.DialOption{grpc.WithContextDialer(testserver.GetBufDialer(listener)), testcredentials.ClientTlsOption(t)}
+	conn, err := grpc.DialContext(ctx, "localhost", opts...)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
@@ -139,7 +73,7 @@ func TestServiceServer_CreateInterest(t *testing.T) {
 	for _, v := range opts {
 		fmt.Printf("Opts v type is %T and val is %v\n", v, v)
 	}
-	connWithToken, err := grpc.Dial(address, opts...)
+	connWithToken, err := grpc.DialContext(ctx, "localhost", opts...)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
