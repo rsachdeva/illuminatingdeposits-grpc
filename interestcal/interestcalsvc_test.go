@@ -30,6 +30,7 @@ func TestServiceServer_CreateInterest(t *testing.T) {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
+
 	email := "growth@drinnovations.us"
 	password := "kubernetes"
 	uMgmtSvcClient := usermgmtpb.NewUserMgmtServiceClient(conn)
