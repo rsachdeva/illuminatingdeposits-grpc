@@ -147,6 +147,10 @@ If you want to get coverages reports with focussed packages:
 go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -func cover.out
 go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -html cover.out
 ```
+If you want coverage on a specific package and run a single test:
+```shell 
+go test -v -count=1 -covermode=count -coverpkg=./mongodbhealth -coverprofile cover.out -run=TestServiceServer_GetMongoDBHealthOk ./... && go tool cover -func cover.out
+```
 Just to run all easily:
 ```shell
 go test -v ./... 
@@ -170,4 +174,4 @@ And if mongodb not connecting for tests: (reference: https://www.xspdf.com/help/
 docker volume rm $(docker volume ls -qf dangling=true)
 ```
 # Version
-v2.40
+v2.50

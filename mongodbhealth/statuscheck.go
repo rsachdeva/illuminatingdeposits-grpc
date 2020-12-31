@@ -18,7 +18,7 @@ func statusCheck(ctx context.Context, mt *mongo.Client) *mongodbhealthpb.GetMong
 		ctx,
 		&readpref.ReadPref{},
 	); err != nil {
-		fmt.Printf("Going to set MongoDB status as not Ready for err %v\n", err)
+		fmt.Printf("Going to set MongoDB status as not Ready for err: %v\n", err)
 		status = "MongoDB Not Ready"
 	}
 

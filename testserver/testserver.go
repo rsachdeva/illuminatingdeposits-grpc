@@ -2,13 +2,15 @@ package testserver
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"testing"
 
+	"github.com/ory/dockertest"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn/mongodbconntest"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth/mongodbhealthpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/testcredentials"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn/userauthnpb"
@@ -25,7 +27,14 @@ const (
 	bufSize = 1024 * 1024
 )
 
-func InitGRPCServerBuffConn(ctx context.Context, t *testing.T) *bufconn.Listener {
+type clientResult struct {
+	Listener    *bufconn.Listener
+	Pool        *dockertest.Pool
+	Resource    *dockertest.Resource
+	MongoClient *mongo.Client
+}
+
+func InitGRPCServerBuffConn(ctx context.Context, t *testing.T) *clientResult {
 	log.SetFlags(log.LstdFlags | log.Ltime | log.Lshortfile)
 	log.Println("Starting ServiceServer...")
 	listener := bufconn.Listen(bufSize)
@@ -33,6 +42,7 @@ func InitGRPCServerBuffConn(ctx context.Context, t *testing.T) *bufconn.Listener
 	var opts []grpc.ServerOption
 	opts = testcredentials.ServerTlsOption(opts)
 	opts = append(opts, grpc.UnaryInterceptor(userauthn.EnsureValidToken))
+	// New server to start for test
 	s := grpc.NewServer(opts...)
 
 	mt, pool, resource := mongodbconntest.Connect(ctx, 1)
@@ -47,6 +57,11 @@ func InitGRPCServerBuffConn(ctx context.Context, t *testing.T) *bufconn.Listener
 	if err != nil {
 		log.Fatal("err in index creation with CreateOne is ", err)
 	}
+	log.Println("Registering gRPC proto MongoDBHealthService...")
+	mongodbhealthpb.RegisterMongoDbHealthServiceServer(s, mongodbhealth.ServiceServer{
+		Mct: mt,
+	})
+
 	log.Println("Index created with name", name)
 	log.Println("Registering gRPC proto UserMgmtService...")
 	usermgmtpb.RegisterUserMgmtServiceServer(s, usermgmt.ServiceServer{
@@ -67,17 +82,22 @@ func InitGRPCServerBuffConn(ctx context.Context, t *testing.T) *bufconn.Listener
 	}()
 
 	t.Cleanup(func() {
-		log.Println("Stopping the server...")
-		s.Stop()
 		log.Println("Closing the listener...")
 		listener.Close()
-		fmt.Println("Purging dockertest for mongodb always; unless commented out to examine any data")
+		log.Println("Stopping the server...")
+		s.Stop()
+		t.Log("Purging dockertest for mongodb always; unless commented out to examine any data")
 		err = pool.Purge(resource)
 		if err != nil {
 			t.Fatalf("Could not purge container: %v", err)
 		}
 		log.Println("End of program")
 	})
-
-	return listener
+	cr := clientResult{
+		Listener:    listener,
+		Pool:        pool,
+		Resource:    resource,
+		MongoClient: mt,
+	}
+	return &cr
 }
