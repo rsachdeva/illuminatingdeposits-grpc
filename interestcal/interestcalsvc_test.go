@@ -22,7 +22,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/oauth"
 )
 
@@ -35,7 +34,7 @@ func initGRPCServerHTTP2(t *testing.T, address string) {
 	}
 
 	var opts []grpc.ServerOption
-	opts = serverTlsOption(opts)
+	opts = testcredentials.ServerTlsOption(opts)
 	opts = append(opts, grpc.UnaryInterceptor(userauthn.EnsureValidToken))
 	s := grpc.NewServer(opts...)
 
@@ -91,7 +90,7 @@ func TestServiceServer_CreateInterest(t *testing.T) {
 
 	address := "localhost:50058"
 	initGRPCServerHTTP2(t, address) // Starting a conventional gRPC server runs on HTTP2
-	opts := []grpc.DialOption{clientTlsOption(t)}
+	opts := []grpc.DialOption{testcredentials.ClientTlsOption(t)}
 	conn, err := grpc.Dial(address, opts...)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -220,26 +219,4 @@ func TestServiceServer_CreateInterest(t *testing.T) {
 	require.Equal(t, ciresp.Banks[0].Deposits[2].Delta, 23.46, "delta for a deposit in a bank must match")
 	require.Equal(t, ciresp.Banks[0].Delta, 259.86, "delta for a bank must match")
 	require.Equal(t, ciresp.Delta, 336.74, "overall delta for all deposists in all banks must match")
-}
-
-func serverTlsOption(opts []grpc.ServerOption) []grpc.ServerOption {
-	certFile := testcredentials.Path("tls/servercrtto.pem")
-	keyFile := testcredentials.Path("tls/serverkeyto.pem")
-	creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
-	if err != nil {
-		log.Fatalf("tls error failed loading certificates %v", err)
-	}
-	opts = []grpc.ServerOption{grpc.Creds(creds)}
-	return opts
-}
-
-// export GODEBUG=x509ignoreCN=0
-func clientTlsOption(t *testing.T) grpc.DialOption {
-	certFile := testcredentials.Path("tls/cacrtto.pem")
-	creds, err := credentials.NewClientTLSFromFile(certFile, "")
-	if err != nil {
-		log.Fatalf("loading certificate error is %v", err)
-	}
-	opt := grpc.WithTransportCredentials(creds)
-	return opt
 }

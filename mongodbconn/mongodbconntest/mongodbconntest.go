@@ -13,7 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-// Basaed on Dockertest
+// Based on Dockertest
 func Connect(ctx context.Context, timeoutSec int) (*mongo.Client, *dockertest.Pool, *dockertest.Resource) {
 	pool, err := dockertest.NewPool("")
 	if err != nil {
