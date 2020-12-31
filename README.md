@@ -142,7 +142,12 @@ to confirm is something else is already running
 docker pull mongo:4.4.2-bionic (only once as tests use this image; so faster)
 export GODEBUG=x509ignoreCN=0
 ``` 
-and then do:
+If you want to get coverages reports with focussed packages:
+```shell 
+go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -func cover.out
+go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -html cover.out
+```
+Just to run all easily:
 ```shell
 go test -v ./... 
 ```
@@ -150,36 +155,6 @@ The -count=1 is mainly to not use caching and can be added as follows if needed 
 any go test command:
 ```shell 
 go test -v -count=1 ./...
-```
-For coverage for per package:
-```shell
-go test -cover ./...
-```
-To see coverage stats in more detail:
-```shell 
-go test -v -coverprofile cover.out ./...
-```
-To see overall total coverage
-```shell 
-go tool cover -func=cover.out
-```
-or
-```shell 
-go tool cover -func cover.out
-```
-To see in the browser the covered parts:
-```shell 
-go tool cover -html cover.out
-```
-Single package:
-```shell 
-go test -v -coverprofile cover.out ./mongodbhealth && go tool cover -func cover.out
-```
-To run tests with coverage and see reports in excluding certain packages not needed:
-In grep -v means "invert the match" in grep, in other words, return all non-matching lines
-```shell 
-go test -v -count=1 -coverprofile cover.out $(go list ./... | grep -v mongodbconn | grep -v pb) && go tool cover -func cover.out
-go test -v -count=1 -coverprofile cover.out $(go list ./... | grep -v mongodbconn) && go tool cover -html cover.out
 ```
 See Editor specifcs to see Covered Parts in the Editor.
 Docker containers are mostly auto removed.
@@ -195,4 +170,4 @@ And if mongodb not connecting for tests: (reference: https://www.xspdf.com/help/
 docker volume rm $(docker volume ls -qf dangling=true)
 ```
 # Version
-v2.36
+v2.40
