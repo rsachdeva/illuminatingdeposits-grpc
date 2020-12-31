@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn/mongodbtestconn"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn/mongodbconntest"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn/userauthnpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt"
@@ -33,7 +33,7 @@ func initGRPCServerHTTP2(t *testing.T, address string) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
-	mt, pool, resource := mongodbtestconn.Connect(ctx, 1)
+	mt, pool, resource := mongodbconntest.Connect(ctx, 1)
 	mdb := mt.Database("depositsmongodb")
 	coll := mdb.Collection("user")
 

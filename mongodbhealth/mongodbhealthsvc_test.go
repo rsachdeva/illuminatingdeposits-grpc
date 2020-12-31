@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn/mongodbtestconn"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn/mongodbconntest"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth/mongodbhealthpb"
 	"github.com/stretchr/testify/require"
@@ -55,7 +55,7 @@ func TestServiceServer_GetMongoDBHealthOk(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	mt, pool, resource := mongodbtestconn.Connect(ctx, 1)
+	mt, pool, resource := mongodbconntest.Connect(ctx, 1)
 	address := "localhost:50053"
 	initGRPCServerHTTP2(t, mt, address) // Starting a conventional gRPC server runs on HTTP2
 
@@ -86,7 +86,7 @@ func TestServiceServer_GetMongoDBHealthNotOk(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
-	mt, pool, resource := mongodbtestconn.Connect(ctx, 1)
+	mt, pool, resource := mongodbconntest.Connect(ctx, 1)
 	address := "localhost:50054"
 	initGRPCServerHTTP2(t, mt, address) // Starting a conventional gRPC server runs on HTTP2
 
