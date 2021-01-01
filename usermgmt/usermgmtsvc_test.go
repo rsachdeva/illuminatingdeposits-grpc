@@ -20,7 +20,7 @@ func TestServiceServer_CreateUser(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
-	cr := testserver.InitGRPCServerBuffConn(ctx, t)
+	cr := testserver.InitGRPCServerBuffConn(ctx, t, true)
 	opts := []grpc.DialOption{grpc.WithContextDialer(testserver.GetBufDialer(cr.Listener)), testcredentials.ClientTlsOption(t)}
 	conn, err := grpc.DialContext(ctx, "localhost", opts...)
 	if err != nil {
@@ -34,7 +34,7 @@ func TestServiceServer_CreateUser(t *testing.T) {
 		NewUser: &usermgmtpb.NewUser{
 			Name:            "Rohit-Sachdeva-User",
 			Email:           "growth@drinnovations.us",
-			Roles:           []string{"USER"},
+			Roles:           []string{"ADMIN"},
 			Password:        "kubernetes",
 			PasswordConfirm: "kubernetes",
 		},

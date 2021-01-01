@@ -20,7 +20,24 @@ func MongoDbConnect(ctx context.Context, timeoutSec int) (*mongo.Client, *docker
 		log.Fatalf("Could not connect to docker: %s", err)
 	}
 
+	// for singlle test if predetrmined port for easier db ui connection; manual clean up required; canot run in parallel restriction
+	// as new docker container with mongodb for each connection; parallel allows faster test execution
+	// opts := dockertest.RunOptions{
+	// 	Repository:   "mongo",
+	// 	Tag:          "4.4.2-bionic",
+	// 	ExposedPorts: []string{"27017"},
+	// 	PortBindings: map[docker.Port][]docker.PortBinding{
+	// 		"27017": {
+	// 			{HostIP: "127.0.0.1", HostPort: "27017"},
+	// 		},
+	// 	},
+	// }
+	// resource, err := pool.RunWithOptions(&opts)
+
 	resource, err := pool.Run("mongo", "4.4.2-bionic", nil)
+	if resource == nil {
+		log.Fatalf("Resource issue in dockertest: %v", err)
+	}
 	log.Println("resource hostport is", resource.GetHostPort("27017/tcp"))
 	if err != nil {
 		log.Fatalf("Could not connect to docker: %v", err)

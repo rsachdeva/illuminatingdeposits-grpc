@@ -138,21 +138,16 @@ ps aux | grep "go_build"
 to confirm is something else is already running
 
 # Running Integration/Unit tests
+Tests are designed to run in parallel with its own test server and docker based mongodb using dockertest.
+To run all tests wirh coverages reports for focussed packages:
 ```shell 
 docker pull mongo:4.4.2-bionic (only once as tests use this image; so faster)
-export GODEBUG=x509ignoreCN=0
-``` 
-If you want to get coverages reports with focussed packages:
-```shell 
+export GODEBUG=x509ignoreCN=0  (only once for your shell as tests use tls) 
 go test -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -func cover.out
 go test -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -html cover.out
 ```
 The -v is for Verbose output: log all tests as they are run. Also print all
 text from Log and Logf calls even if the test succeeds.
-If you want coverage on a specific package and run a single test with verbose output:
-```shell 
-go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out -run=TestServiceServer_CreateUser ./usermgmt/... && go tool cover -func cover.out
-```
 Just to run all easily with verbose ouput:
 ```shell
 go test -v ./... 
@@ -163,11 +158,19 @@ any go test command:
 go test -v -count=1 ./...
 ```
 See Editor specifcs to see Covered Parts in the Editor.
-Docker containers are mostly auto removed.
-There could be a container to inspect data.
-In case any docker containers still running after tests:
-
+#### Test Docker containers for Mongodb
+Docker containers are mostly auto removed. This is done by passing true to testserver.InitGRPCServerBuffConn(ctx, t, false)
+in your test.
+If you want to examine mongodb data for a particular test, you can temporarily 
+set allowPurge as false in testserver.InitGRPCServerBuffConn(ctx, t, false) for your test.
+Then after running specific failed test connect mongo db in the docker container using any db ui.
+As an example, if you want coverage on a specific package and run a single test in a package with verbose output:
 ```shell 
+go test -v -count=1 -covermode=count -coverpkg=./usermgmt -coverprofile cover.out -run=TestServiceServer_CreateUser ./usermgmt/... && go tool cover -func cover.out
+```
+Any docker containers still running after tests should be manually removed:
+```shell 
+docker ps
 docker stop $(docker ps -qa)
 docker rm -f $(docker ps -qa)
 ```
@@ -176,4 +179,4 @@ And if mongodb not connecting for tests: (reference: https://www.xspdf.com/help/
 docker volume rm $(docker volume ls -qf dangling=true)
 ```
 # Version
-v2.52
+v2.53

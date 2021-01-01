@@ -23,14 +23,16 @@ import (
 
 const (
 	bufSize = 1024 * 1024
+	// change this to false to examine data inside dockertest mongodb instance created for the specific test
 )
 
+// useful for client to use
 type clientResult struct {
 	Listener    *bufconn.Listener
 	MongoClient *mongo.Client
 }
 
-func InitGRPCServerBuffConn(ctx context.Context, t *testing.T) *clientResult {
+func InitGRPCServerBuffConn(ctx context.Context, t *testing.T, allowPurge bool) *clientResult {
 	log.SetFlags(log.LstdFlags | log.Ltime | log.Lshortfile)
 	log.Println("Starting ServiceServer...")
 	listener := bufconn.Listen(bufSize)
@@ -82,10 +84,13 @@ func InitGRPCServerBuffConn(ctx context.Context, t *testing.T) *clientResult {
 		listener.Close()
 		log.Println("Stopping the server...")
 		s.Stop()
-		t.Log("Purging dockertest for mongodb always; unless commented out to examine any data")
-		err = pool.Purge(resource)
-		if err != nil {
-			t.Fatalf("Could not purge container: %v", err)
+		t.Logf("Purge allowed is %v", allowPurge)
+		if allowPurge {
+			t.Log("Purging dockertest for mongodb")
+			err = pool.Purge(resource)
+			if err != nil {
+				t.Fatalf("Could not purge container: %v", err)
+			}
 		}
 		log.Println("End of program")
 	})
