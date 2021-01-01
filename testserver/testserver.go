@@ -5,10 +5,8 @@ import (
 	"log"
 	"testing"
 
-	"github.com/ory/dockertest"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
-	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn/mongodbconntest"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth/mongodbhealthpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/testcredentials"
@@ -29,8 +27,6 @@ const (
 
 type clientResult struct {
 	Listener    *bufconn.Listener
-	Pool        *dockertest.Pool
-	Resource    *dockertest.Resource
 	MongoClient *mongo.Client
 }
 
@@ -45,7 +41,7 @@ func InitGRPCServerBuffConn(ctx context.Context, t *testing.T) *clientResult {
 	// New server to start for test
 	s := grpc.NewServer(opts...)
 
-	mt, pool, resource := mongodbconntest.Connect(ctx, 1)
+	mt, pool, resource := MongoDbConnect(ctx, 1)
 	mdb := mt.Database("depositsmongodb")
 	coll := mdb.Collection("user")
 
@@ -95,8 +91,6 @@ func InitGRPCServerBuffConn(ctx context.Context, t *testing.T) *clientResult {
 	})
 	cr := clientResult{
 		Listener:    listener,
-		Pool:        pool,
-		Resource:    resource,
 		MongoClient: mt,
 	}
 	return &cr

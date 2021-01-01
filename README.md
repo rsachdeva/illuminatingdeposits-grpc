@@ -144,14 +144,16 @@ export GODEBUG=x509ignoreCN=0
 ``` 
 If you want to get coverages reports with focussed packages:
 ```shell 
-go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -func cover.out
-go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -html cover.out
+go test -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -func cover.out
+go test -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -html cover.out
 ```
-If you want coverage on a specific package and run a single test:
+The -v is for Verbose output: log all tests as they are run. Also print all
+text from Log and Logf calls even if the test succeeds.
+If you want coverage on a specific package and run a single test with verbose output:
 ```shell 
-go test -v -count=1 -covermode=count -coverpkg=./mongodbhealth -coverprofile cover.out -run=TestServiceServer_GetMongoDBHealthOk ./... && go tool cover -func cover.out
+go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out -run=TestServiceServer_CreateUser ./usermgmt/... && go tool cover -func cover.out
 ```
-Just to run all easily:
+Just to run all easily with verbose ouput:
 ```shell
 go test -v ./... 
 ```
@@ -174,4 +176,4 @@ And if mongodb not connecting for tests: (reference: https://www.xspdf.com/help/
 docker volume rm $(docker volume ls -qf dangling=true)
 ```
 # Version
-v2.50
+v2.52
