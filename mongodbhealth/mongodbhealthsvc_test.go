@@ -35,7 +35,7 @@ func TestServiceServer_GetMongoDBHealthOk(t *testing.T) {
 		log.Fatalf("Could not check Mongodb status: %v", err)
 	}
 	log.Printf("response %s", mdbresp.Health)
-	require.Equal(t, mdbresp.Health.Status, "MongoDb Ok")
+	require.Equal(t, "MongoDb Ok", mdbresp.Health.Status)
 }
 
 // Conventional test that starts a gRPC server and client test the service with RPC
@@ -65,5 +65,5 @@ func TestServiceServer_GetMongoDBHealthNotOk(t *testing.T) {
 		log.Fatalf("Could not check Mongodb status: %v", err)
 	}
 	log.Printf("response %s", mdbresp.Health)
-	require.Equal(t, mdbresp.Health.Status, "MongoDB Not Ready")
+	require.Equal(t, "MongoDB Not Ready", mdbresp.Health.Status)
 }

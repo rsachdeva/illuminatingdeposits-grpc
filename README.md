@@ -143,11 +143,11 @@ To run all tests wirh coverages reports for focussed packages:
 ```shell 
 docker pull mongo:4.4.2-bionic (only once as tests use this image; so faster)
 export GODEBUG=x509ignoreCN=0  (only once for your shell as tests use tls) 
-go test -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -func cover.out
-go test -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -html cover.out
+go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -func cover.out
+go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -html cover.out
 ```
-The -v is for Verbose output: log all tests as they are run. Also print all
-text from Log and Logf calls even if the test succeeds.
+The -v is for Verbose output: log all tests as they are run. Search "FAIL:" in parallel test output here to see reason for failure
+in case any test fails.
 Just to run all easily with verbose ouput:
 ```shell
 go test -v ./... 
@@ -179,4 +179,4 @@ And if mongodb not connecting for tests: (reference: https://www.xspdf.com/help/
 docker volume rm $(docker volume ls -qf dangling=true)
 ```
 # Version
-v2.53
+v3.0

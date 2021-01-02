@@ -115,6 +115,7 @@ func compoundInterest(apy float64, years float64, amount float64) float64 {
 }
 
 func earned30days(iEarned float64, years float64) (float64, error) {
+	fmt.Printf("years is %v\n", years)
 	if years*365 < 30 {
 		return 0, fmt.Errorf("NewDeposit period in years %v should not be less than 30 days", years)
 	}

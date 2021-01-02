@@ -44,7 +44,7 @@ func TestServiceServer_CreateUser(t *testing.T) {
 		log.Println("error calling CreateUser service", err)
 	}
 	log.Printf("response %s", umresp.User)
-	require.Equal(t, umresp.User.Email, "growth@drinnovations.us")
+	require.Equal(t, "growth@drinnovations.us", umresp.User.Email)
 
 	req = usermgmtpb.CreateUserRequest{
 		NewUser: &usermgmtpb.NewUser{
