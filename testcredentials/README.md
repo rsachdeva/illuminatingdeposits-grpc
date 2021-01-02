@@ -1,2 +1,2 @@
-For tests within gRPC-Go repo, please use the files in testsdata/tls
+For tests, using the files in testcredentials/tls
 directory.

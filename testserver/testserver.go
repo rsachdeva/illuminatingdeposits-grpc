@@ -32,7 +32,7 @@ type clientResult struct {
 	MongoClient *mongo.Client
 }
 
-func InitGRPCServerBuffConn(ctx context.Context, t *testing.T, allowPurge bool) *clientResult {
+func InitGrpcWithBuffConn(ctx context.Context, t *testing.T, allowPurge bool) *clientResult {
 	log.SetFlags(log.LstdFlags | log.Ltime | log.Lshortfile)
 	log.Println("Starting ServiceServer...")
 	listener := bufconn.Listen(bufSize)

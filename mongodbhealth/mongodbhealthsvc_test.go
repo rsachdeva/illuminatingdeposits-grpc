@@ -21,7 +21,7 @@ func TestServiceServer_GetMongoDBHealthOk(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
-	cr := testserver.InitGRPCServerBuffConn(ctx, t, true)
+	cr := testserver.InitGrpcWithBuffConn(ctx, t, true)
 	opts := []grpc.DialOption{grpc.WithContextDialer(testserver.GetBufDialer(cr.Listener)), testcredentials.ClientTlsOption(t), grpc.WithBlock()}
 	conn, err := grpc.DialContext(ctx, "localhost", opts...)
 	if err != nil {
@@ -44,7 +44,7 @@ func TestServiceServer_GetMongoDBHealthNotOk(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
-	cr := testserver.InitGRPCServerBuffConn(ctx, t, true)
+	cr := testserver.InitGrpcWithBuffConn(ctx, t, true)
 	opts := []grpc.DialOption{grpc.WithContextDialer(testserver.GetBufDialer(cr.Listener)), testcredentials.ClientTlsOption(t), grpc.WithBlock()}
 	conn, err := grpc.DialContext(ctx, "localhost", opts...)
 	if err != nil {

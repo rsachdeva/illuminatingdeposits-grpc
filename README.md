@@ -125,18 +125,6 @@ Check version using command:
 openssl version
 ```
 
-# Troubleshooting
-If for any reason no connection is happening from client to server or client hangs or server start up issues:
-Run 
-```
-ps aux | grep "go run" 
-```
-or
-```
-ps aux | grep "go_build" 
-```
-to confirm is something else is already running
-
 # Running Integration/Unit tests
 Tests are designed to run in parallel with its own test server and docker based mongodb using dockertest.
 To run all tests wirh coverages reports for focussed packages:
@@ -152,7 +140,7 @@ Just to run all easily with verbose ouput:
 ```shell
 go test -v ./... 
 ```
-The -count=1 is mainly to not use caching and can be added as follows if needed for 
+The -count=1 is mainly to not use caching and can be added as follows if needed for
 any go test command:
 ```shell 
 go test -v -count=1 ./...
@@ -161,9 +149,9 @@ See Editor specifcs to see Covered Parts in the Editor.
 #### Test Docker containers for Mongodb
 Docker containers are mostly auto removed. This is done by passing true to testserver.InitGRPCServerBuffConn(ctx, t, false)
 in your test.
-If you want to examine mongodb data for a particular test, you can temporarily 
+If you want to examine mongodb data for a particular test, you can temporarily
 set allowPurge as false in testserver.InitGRPCServerBuffConn(ctx, t, false) for your test.
-Then after running specific failed test connect mongo db in the docker container using any db ui.
+Then after running specific failed test connect to mongo db in the docker container using any db ui.
 As an example, if you want coverage on a specific package and run a single test in a package with verbose output:
 ```shell 
 go test -v -count=1 -covermode=count -coverpkg=./usermgmt -coverprofile cover.out -run=TestServiceServer_CreateUser ./usermgmt/... && go tool cover -func cover.out
@@ -178,5 +166,18 @@ And if mongodb not connecting for tests: (reference: https://www.xspdf.com/help/
 ```shell 
 docker volume rm $(docker volume ls -qf dangling=true)
 ```
+
+# Troubleshooting
+If for any reason no connection is happening from client to server or client hangs or server start up issues:
+Run 
+```
+ps aux | grep "go run" 
+```
+or
+```
+ps aux | grep "go_build" 
+```
+to confirm is something else is already running
+
 # Version
 v3.0
