@@ -127,13 +127,20 @@ openssl version
 
 # Running Integration/Unit tests
 Tests are designed to run in parallel with its own test server and docker based mongodb using dockertest.
-To run all tests wirh coverages reports for focussed packages:
+To run all tests with coverages reports for focussed packages:
+Run following only once as tests use this image; so faster:
 ```shell 
-docker pull mongo:4.4.2-bionic (only once as tests use this image; so faster)
-export GODEBUG=x509ignoreCN=0  (only once for your shell as tests use tls) 
+docker pull mongo:4.4.2-bionic 
+``` 
+And then run the following:
+```shell
+export GODEBUG=x509ignoreCN=0 
 go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -func cover.out
 go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -html cover.out
 ```
+Coverage Result for covered packages:  
+**total:	(statements)	87.6%**  
+
 The -v is for Verbose output: log all tests as they are run. Search "FAIL:" in parallel test output here to see reason for failure
 in case any test fails.
 Just to run all easily with verbose ouput:

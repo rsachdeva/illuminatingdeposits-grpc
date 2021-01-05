@@ -24,7 +24,7 @@ func TestServiceServer_CreateInterest(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
-	cr := testserver.InitGrpcWithBuffConn(ctx, t, true)
+	cr := testserver.InitGrpcTLSWithBuffConn(ctx, t, true)
 	opts := []grpc.DialOption{grpc.WithContextDialer(testserver.GetBufDialer(cr.Listener)), testcredentials.ClientTlsOption(t)}
 	conn, err := grpc.DialContext(ctx, "localhost", opts...)
 	if err != nil {
@@ -59,9 +59,9 @@ func TestServiceServer_CreateInterest(t *testing.T) {
 			Password: password,
 		},
 	}
-	uaresp, err := uAuthnSvcClient.CreateToken(context.Background(), &ctreq)
+	ctresp, err := uAuthnSvcClient.CreateToken(context.Background(), &ctreq)
 	require.Nil(t, err, "Error should be nil when creating accessToken")
-	accessToken := uaresp.VerifiedUser.AccessToken
+	accessToken := ctresp.VerifiedUser.AccessToken
 	t.Logf("access accessToken is %v", accessToken)
 
 	oaToken := oauth2.Token{

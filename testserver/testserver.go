@@ -32,7 +32,7 @@ type clientResult struct {
 	MongoClient *mongo.Client
 }
 
-func InitGrpcWithBuffConn(ctx context.Context, t *testing.T, allowPurge bool) *clientResult {
+func InitGrpcTLSWithBuffConn(ctx context.Context, t *testing.T, allowPurge bool) *clientResult {
 	log.SetFlags(log.LstdFlags | log.Ltime | log.Lshortfile)
 	log.Println("Starting ServiceServer...")
 	listener := bufconn.Listen(bufSize)
@@ -92,7 +92,7 @@ func InitGrpcWithBuffConn(ctx context.Context, t *testing.T, allowPurge bool) *c
 				t.Fatalf("Could not purge container: %v", err)
 			}
 		}
-		log.Println("End of program")
+		log.Println("End of cleaup")
 	})
 	cr := clientResult{
 		Listener:    listener,
