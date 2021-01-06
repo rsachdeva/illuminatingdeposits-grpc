@@ -20,7 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type MongoDbHealthServiceClient interface {
 	// https://developers.google.com/protocol-buffers/docs/proto3#any
 	// https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.Empty
-	GetMongoDBHealth(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetMongoDBHealthResponse, error)
+	Health(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*HealthResponse, error)
 }
 
 type mongoDbHealthServiceClient struct {
@@ -31,9 +31,9 @@ func NewMongoDbHealthServiceClient(cc grpc.ClientConnInterface) MongoDbHealthSer
 	return &mongoDbHealthServiceClient{cc}
 }
 
-func (c *mongoDbHealthServiceClient) GetMongoDBHealth(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetMongoDBHealthResponse, error) {
-	out := new(GetMongoDBHealthResponse)
-	err := c.cc.Invoke(ctx, "/mongodbhealthpb.MongoDbHealthService/GetMongoDBHealth", in, out, opts...)
+func (c *mongoDbHealthServiceClient) Health(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*HealthResponse, error) {
+	out := new(HealthResponse)
+	err := c.cc.Invoke(ctx, "/mongodbhealthpb.MongoDbHealthService/Health", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (c *mongoDbHealthServiceClient) GetMongoDBHealth(ctx context.Context, in *e
 type MongoDbHealthServiceServer interface {
 	// https://developers.google.com/protocol-buffers/docs/proto3#any
 	// https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.Empty
-	GetMongoDBHealth(context.Context, *emptypb.Empty) (*GetMongoDBHealthResponse, error)
+	Health(context.Context, *emptypb.Empty) (*HealthResponse, error)
 	mustEmbedUnimplementedMongoDbHealthServiceServer()
 }
 
@@ -54,8 +54,8 @@ type MongoDbHealthServiceServer interface {
 type UnimplementedMongoDbHealthServiceServer struct {
 }
 
-func (UnimplementedMongoDbHealthServiceServer) GetMongoDBHealth(context.Context, *emptypb.Empty) (*GetMongoDBHealthResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMongoDBHealth not implemented")
+func (UnimplementedMongoDbHealthServiceServer) Health(context.Context, *emptypb.Empty) (*HealthResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Health not implemented")
 }
 func (UnimplementedMongoDbHealthServiceServer) mustEmbedUnimplementedMongoDbHealthServiceServer() {}
 
@@ -70,20 +70,20 @@ func RegisterMongoDbHealthServiceServer(s grpc.ServiceRegistrar, srv MongoDbHeal
 	s.RegisterService(&_MongoDbHealthService_serviceDesc, srv)
 }
 
-func _MongoDbHealthService_GetMongoDBHealth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _MongoDbHealthService_Health_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MongoDbHealthServiceServer).GetMongoDBHealth(ctx, in)
+		return srv.(MongoDbHealthServiceServer).Health(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/mongodbhealthpb.MongoDbHealthService/GetMongoDBHealth",
+		FullMethod: "/mongodbhealthpb.MongoDbHealthService/Health",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MongoDbHealthServiceServer).GetMongoDBHealth(ctx, req.(*emptypb.Empty))
+		return srv.(MongoDbHealthServiceServer).Health(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -93,8 +93,8 @@ var _MongoDbHealthService_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*MongoDbHealthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetMongoDBHealth",
-			Handler:    _MongoDbHealthService_GetMongoDBHealth_Handler,
+			MethodName: "Health",
+			Handler:    _MongoDbHealthService_Health_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

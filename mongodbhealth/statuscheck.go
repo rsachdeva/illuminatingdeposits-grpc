@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func statusCheck(ctx context.Context, mt *mongo.Client) *mongodbhealthpb.GetMongoDBHealthResponse {
+func statusCheck(ctx context.Context, mt *mongo.Client) *mongodbhealthpb.HealthResponse {
 
 	//  Running this query forces a
 	// round trip to the mongodb.
@@ -26,7 +26,7 @@ func statusCheck(ctx context.Context, mt *mongo.Client) *mongodbhealthpb.GetMong
 		Status: status,
 	}
 
-	mdbresp := mongodbhealthpb.GetMongoDBHealthResponse{
+	mdbresp := mongodbhealthpb.HealthResponse{
 		Health: &h,
 	}
 

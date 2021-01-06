@@ -53,7 +53,7 @@ func main() {
 }
 
 func nonAccessTokenRequests(conn *grpc.ClientConn, email string) {
-	requestGetMongoDBHealth(conn)
+	requestMongoDBHealth(conn)
 	requestCreateUser(conn, email)
 }
 
@@ -81,11 +81,11 @@ func tlsOption() grpc.DialOption {
 	return opt
 }
 
-func requestGetMongoDBHealth(conn *grpc.ClientConn) {
-	fmt.Println("executing requestGetMongoDBHealth")
+func requestMongoDBHealth(conn *grpc.ClientConn) {
+	fmt.Println("executing requestMongoDBHealth")
 	mdbSvcClient := mongodbhealthpb.NewMongoDbHealthServiceClient(conn)
 	fmt.Println("mdbSvcClient client created")
-	mdbresp, err := mdbSvcClient.GetMongoDBHealth(context.Background(), &emptypb.Empty{})
+	mdbresp, err := mdbSvcClient.Health(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		log.Println("error calling MongoDBHealth service", err)
 	}

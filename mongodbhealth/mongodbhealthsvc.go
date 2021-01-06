@@ -13,7 +13,7 @@ type ServiceServer struct {
 	Mct *mongo.Client
 }
 
-func (svc ServiceServer) GetMongoDBHealth(ctx context.Context, em *emptypb.Empty) (*mongodbhealthpb.GetMongoDBHealthResponse, error) {
+func (svc ServiceServer) Health(ctx context.Context, em *emptypb.Empty) (*mongodbhealthpb.HealthResponse, error) {
 	mdbresp := statusCheck(ctx, svc.Mct)
 	return mdbresp, nil
 }

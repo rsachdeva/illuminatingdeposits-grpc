@@ -6,8 +6,12 @@
 brew install protobuf
 ``` 
 Enable module mode (or just execute next command from any directory outside of project having go.mod)
-```
-export GO111MODULE=on 
+Reference: https://grpc.io/docs/languages/go/quickstart/
+```shell
+brew install protobuf
+protoc --version  # Ensure compiler version is 3+
+# install Go plugins for the protocol compiler protoc
+export GO111MODULE=on  
 go get google.golang.org/protobuf/cmd/protoc-gen-go google.golang.org/grpc/cmd/protoc-gen-go-grpc 
 ```
 
@@ -80,7 +84,7 @@ docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml down
 docker-compose -f ./deploy/compose/docker-compose.grpc.server.yml down
 ```
 
-### To start only external db and trace service for working with local machine Editor/IDE:
+### To start only external db for working with local machine Editor/IDE:
 Execute:
 ```shell
 export COMPOSE_IGNORE_ORPHANS=True && \

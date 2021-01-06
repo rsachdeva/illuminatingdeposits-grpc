@@ -16,7 +16,7 @@ import (
 )
 
 // Conventional test that starts a gRPC server and client test the service with RPC
-func TestServiceServer_GetMongoDBHealthOk(t *testing.T) {
+func TestServiceServer_HealthOk(t *testing.T) {
 	t.Parallel()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
@@ -30,7 +30,7 @@ func TestServiceServer_GetMongoDBHealthOk(t *testing.T) {
 	defer conn.Close()
 
 	mdbSvcClient := mongodbhealthpb.NewMongoDbHealthServiceClient(conn)
-	mdbresp, err := mdbSvcClient.GetMongoDBHealth(context.Background(), &emptypb.Empty{})
+	mdbresp, err := mdbSvcClient.Health(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		log.Fatalf("Could not check Mongodb status: %v", err)
 	}
@@ -39,7 +39,7 @@ func TestServiceServer_GetMongoDBHealthOk(t *testing.T) {
 }
 
 // Conventional test that starts a gRPC server and client test the service with RPC
-func TestServiceServer_GetMongoDBHealthNotOk(t *testing.T) {
+func TestServiceServer_HealthNotOk(t *testing.T) {
 	t.Parallel()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
@@ -60,7 +60,7 @@ func TestServiceServer_GetMongoDBHealthNotOk(t *testing.T) {
 
 	mdbSvcClient := mongodbhealthpb.NewMongoDbHealthServiceClient(conn)
 
-	mdbresp, err := mdbSvcClient.GetMongoDBHealth(context.Background(), &emptypb.Empty{})
+	mdbresp, err := mdbSvcClient.Health(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		log.Fatalf("Could not check Mongodb status: %v", err)
 	}

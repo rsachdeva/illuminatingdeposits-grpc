@@ -9,16 +9,12 @@ message Health {
   string status = 1;
 }
 
-message GetMongoDBHealthResponse {
+message HealthResponse {
   Health health = 1;
 }
 
-// Interest calculation service
-// can be like regular method CalculateInterest - does not have to be resource oriented
-// or CreateInterest -- more resource oriented style https://cloud.google.com/apis/design/standard_methods
-// Keeping it more like resource oriented
 service MongoDbHealthService {
   // https://developers.google.com/protocol-buffers/docs/proto3#any
   // https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.Empty
-  rpc GetMongoDBHealth(google.protobuf.Empty) returns (GetMongoDBHealthResponse);
+  rpc Health(google.protobuf.Empty) returns (HealthResponse);
 }
