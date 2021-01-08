@@ -32,6 +32,8 @@ generateusermgmtservice.sh
 # Features include:
 - Golang (Go) gRPC Service Methods with protobuf for Messages
 - TLS for all requests
+- Integration and Unit tests
+- Coverage Result for key packages
 - MongoDB health check service
 - User Management service with MongoDB for user creation
 - JWT generation for Authentication 
@@ -136,13 +138,13 @@ Run following only once as tests use this image; so faster:
 ```shell 
 docker pull mongo:4.4.2-bionic 
 ``` 
-And then run the following:
+And then run the following with coverages for key packages concerned:
 ```shell
 export GODEBUG=x509ignoreCN=0 
 go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -func cover.out
 go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -html cover.out
 ```
-Coverage Result for covered packages:  
+Coverage Result for key packages: 
 **total:	(statements)	87.6%**  
 
 The -v is for Verbose output: log all tests as they are run. Search "FAIL:" in parallel test output here to see reason for failure
