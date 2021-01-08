@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/testcredentials"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/testserver"
@@ -156,47 +155,4 @@ func TestServiceServer_CreateInterest(t *testing.T) {
 	require.Equal(t, 23.46, ciresp.Banks[0].Deposits[2].Delta, "delta for a deposit in a bank must match")
 	require.Equal(t, 259.86, ciresp.Banks[0].Delta, "delta for a bank must match")
 	require.Equal(t, 336.74, ciresp.Delta, "overall delta for all deposists in all banks must match")
-}
-
-func TestCalculateDeltaLessThan30Days(t *testing.T) {
-	t.Parallel()
-
-	svc := interestcal.ServiceServer{}
-	cireq := interestcalpb.CreateInterestRequest{
-		NewBanks: []*interestcalpb.NewBank{
-			{
-				Name: "HAPPIEST",
-				NewDeposits: []*interestcalpb.NewDeposit{
-					{
-						Account:     "28282",
-						AccountType: "CD",
-						Apy:         5,
-						Years:       0.0001,
-						Amount:      1000000,
-					},
-				},
-			},
-		},
-	}
-	_, err := svc.CreateInterest(context.Background(), &cireq)
-	require.NotNil(t, err, "NewDeposit period in years 0.0001 should not be less than 30 days")
-}
-
-func TestCalculateDeltaNoDeposits(t *testing.T) {
-	t.Parallel()
-
-	svc := interestcal.ServiceServer{}
-	cireq := interestcalpb.CreateInterestRequest{
-		NewBanks: []*interestcalpb.NewBank{
-			{
-				Name:        "HAPPIEST",
-				NewDeposits: []*interestcalpb.NewDeposit{},
-			},
-		},
-	}
-
-	ciresp, err := svc.CreateInterest(context.Background(), &cireq)
-	require.Nil(t, err)
-	require.Equal(t, "HAPPIEST", ciresp.Banks[0].Name)
-	require.Equal(t, 0.0, ciresp.Banks[0].Delta)
 }

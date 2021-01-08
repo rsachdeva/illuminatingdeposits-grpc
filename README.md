@@ -32,7 +32,7 @@ generateusermgmtservice.sh
 # Features include:
 - Golang (Go) gRPC Service Methods with protobuf for Messages
 - TLS for all requests
-- Integration and Unit tests
+- Integration and Unit tests run in parallel
 - Coverage Result for key packages
 - MongoDB health check service
 - User Management service with MongoDB for user creation
@@ -145,7 +145,7 @@ go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbh
 go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -html cover.out
 ```
 Coverage Result for key packages: 
-**total:	(statements)	87.6%**  
+**total:	(statements)	91.9%**  
 
 The -v is for Verbose output: log all tests as they are run. Search "FAIL:" in parallel test output here to see reason for failure
 in case any test fails.
@@ -193,4 +193,4 @@ ps aux | grep "go_build"
 to confirm is something else is already running
 
 # Version
-v3.0
+v1.3.0
