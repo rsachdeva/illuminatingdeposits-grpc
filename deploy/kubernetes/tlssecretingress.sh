@@ -1,0 +1,1 @@
+kubectl create secret tls illuminatingdeposits-rest-secret-tls --key conf/tls/serverkeyto.pem --cert conf/tls/servercrtto.pem

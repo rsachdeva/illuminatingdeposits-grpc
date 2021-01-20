@@ -86,23 +86,99 @@ docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml down
 docker-compose -f ./deploy/compose/docker-compose.grpc.server.yml down
 ```
 
-### To start only external db for working with local machine Editor/IDE:
-Execute:
+# Kubernetes Deployment
+(for Better control; For Local Setup tested with Docker Desktop latest version with Kubernetes Enabled)
+
+### Installing Ingress controller
+Using helm to install nginx ingress controller
 ```shell
-export COMPOSE_IGNORE_ORPHANS=True && \
-docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up
+brew install helm
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm repo list
 ```
-And then run following:
+and then use
 ```shell
-export DEPOSITS_GRPC_SERVICE_TLS=true
-export DEPOSITS_GRPC_DB_HOST=127.0.0.1
-go run ./tools/dbindexescli  (only once)
-go run ./cmd/server
+helm install ingress-nginx -f ./deploy/kubernetes/nginx-ingress-controller/helm-values.yaml ingress-nginx/ingress-nginx
+```
+to install ingress controller
+To see logs for nginx ingress controller:
+```shell
+kubectl logs -l app.kubernetes.io/name=ingress-nginx -f
 ```
 
-### gRPC Services Endpoints Invoked:
+### Make docker images and Push Images to Docker Hub
 
-#### Sanity test Client:
+```shell
+docker build -t rsachdeva/illuminatingdeposits.grpc.server:v1.3.01 -f ./build/Dockerfile.grpc.server .  
+docker build -t rsachdeva/illuminatingdeposits.seed:v1.3.01 -f ./build/Dockerfile.dbindexes .  
+
+docker push rsachdeva/illuminatingdeposits.grpc.server:v1.4.0
+docker push rsachdeva/illuminatingdeposits.dbindexes:v1.4.0
+``` 
+
+### Quick deploy for all resources
+```shell
+kubectl apply -f deploy/kubernetes/.
+```
+If status for ```kubectl get pod -l job-name=seed | grep "Completed"```
+shows completed for seed pod, optionally can be deleted:
+```shell
+kubectl delete -f deploy/kubernetes/seed.yaml
+```
+
+### Detailed - Step by Step
+
+##### Start mongodb service
+
+```shell
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm install mongodb -f ./deploy/kubernetes/mongodb/helm-values.yaml bitnami/mongodb
+```
+To see values applied see:
+```shell
+helm template mongodb -f ./deploy/kubernetes/mongodb/helm-values.yaml bitnami/mongodb
+```
+
+
+#### Then Migrate and set up seed data manually for more control initially:
+First should see in logs
+database system is ready to accept connections
+```kubectl logs pod/postgres-deposits-0```
+And then execute migration/seed data for manual control when getting started:
+```shell
+kubectl apply -f deploy/kubernetes/seed.yaml
+```
+And if status for ```kubectl get pod -l job-name=seed | grep "Completed"```
+shows completed for seed pod, optionally can be deleted:
+```shell
+kubectl delete -f deploy/kubernetes/seed.yaml
+```
+To connect external tool with postgres to see database internals use:
+Use a connection string similar to:
+jdbc:postgresql://127.0.0.1:30007/postgres
+If still an issue you can try
+kubectl port-forward service/postgres 5432:postgres
+Now can easily connect using
+jdbc:postgresql://localhost:5432/postgres
+
+#### Illuminating deposists gRPC server in Kubernetes!
+```shell
+kubectl apply -f deploy/kubernetes/grpc-server.yaml
+```
+And see logs using
+```kubectl logs -l app=grpcserversvc -f```
+
+
+
+### Remove all resources / Shutdown
+
+```shell
+kubectl delete -f ./deploy/kubernetes/.
+helm uninstall ingress-nginx
+```
+
+# Sanity test Client - gRPC Services Endpoints Invoked Externally:
 The server side DEPOSITS_GRPC_SERVICE_TLS should be consistent and set for client also.
 Uncomment any request function if not desired.
 
@@ -180,6 +256,20 @@ And if mongodb not connecting for tests: (reference: https://www.xspdf.com/help/
 docker volume rm $(docker volume ls -qf dangling=true)
 ```
 
+# Editor/IDE development without docker/docker compose/kubernetes as described above
+Execute:
+```shell
+export COMPOSE_IGNORE_ORPHANS=True && \
+docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up
+```
+And then run following:
+```shell
+export DEPOSITS_GRPC_SERVICE_TLS=true
+export DEPOSITS_GRPC_DB_HOST=127.0.0.1
+go run ./tools/dbindexescli  (only once)
+go run ./cmd/server
+```
+
 # Troubleshooting
 If for any reason no connection is happening from client to server or client hangs or server start up issues:
 Run 
@@ -193,4 +283,4 @@ ps aux | grep "go_build"
 to confirm is something else is already running
 
 # Version
-v1.3.0
+v1.3.01

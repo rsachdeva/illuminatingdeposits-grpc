@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpcserversvc
+  labels:
+    app: grpcserversvc
+spec:
+  # at least 2 for production
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grpcserversvc
+  template:
+    metadata:
+      labels:
+        app: grpcserversvc
+    spec:
+      containers:
+        - name: grpcserversvc
+          image: rsachdeva/illuminatingdeposits.grpc.server:v1.3.01
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: httpserver
+            - containerPort: 4000
+              name: debug
+          env:
+            - name: DEPOSITS_GRPC_SERVICE_TLS
+              value: "true"
+            - name: DEPOSITS_WEB_ADDRESS
+              value: "0.0.0.0:50052"
+            - name: DEPOSITS_GRPC_DB_HOST
+              value: depositsmongodb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grpcserversvc
+  labels:
+    app: grpcserversvc
+spec:
+  type: ClusterIP
+  ports:
+    - name: httpserver
+      port: 3000
+      protocol: TCP
+      # for container
+      targetPort: 3000
+    - name: debug
+      port: 4000
+      protocol: TCP
+      # for container
+      targetPort: 4000
+  selector:
+    app: grpcserversvc
+---
+#apiVersion: networking.k8s.io/v1beta1
+#  kind: Ingress
+#  metadata:
+#    annotations:
+#      kubernetes.io/ingress.class: nginx
+#    name: example
+#    namespace: foo
+#  spec:
+#    rules:
+#      - host: www.example.com
+#        http:
+#          paths:
+#            - backend:
+#                serviceName: exampleService
+#                servicePort: 80
+#              path: /
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: grpcserversvc
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # https://stackoverflow.com/questions/64647258/how-nginx-ingress-controller-back-end-protocol-annotation-works-in-path-based-ro
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+spec:
+  tls:
+    - hosts:
+       - grpcserversvc.127.0.0.1.nip.io
+      secretName: illuminatingdeposits-grpc-secret-tls
+  rules:
+    - host: grpcserversvc.127.0.0.1.nip.io
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: grpcserversvc
+              #  for service port exposed; not for container directly
+              servicePort: 3000
+    - host: debugdepositsgrpc.127.0.0.1.nip.io
+      http:
+        paths:
+            - path: /debug/pprof
+              backend:
+                serviceName: grpcserversvc
+                #  for service port exposed; not for container directly
+                servicePort: 4000

@@ -1,0 +1,4 @@
+controller:
+ extraEnvs:
+   - name: GODEBUG
+     value: x509ignoreCN=0
