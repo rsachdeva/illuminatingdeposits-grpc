@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dbindexes
+spec:
+  backoffLimit: 10
+  template:
+    metadata:
+      name: dbindexes
+    spec:
+      containers:
+        - name: dbindexes
+          image: rsachdeva/illuminatingdeposits.dbindexes:v1.3.01
+          imagePullPolicy: IfNotPresent
+          command:
+            - "bash"
+            - "-c"
+            - "./dbindexescli"
+          env:
+            - name: DEPOSITS_GRPC_DB_HOST
+              value: depositsmongodb
+      restartPolicy: Never

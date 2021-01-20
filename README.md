@@ -111,7 +111,7 @@ kubectl logs -l app.kubernetes.io/name=ingress-nginx -f
 
 ```shell
 docker build -t rsachdeva/illuminatingdeposits.grpc.server:v1.3.01 -f ./build/Dockerfile.grpc.server .  
-docker build -t rsachdeva/illuminatingdeposits.seed:v1.3.01 -f ./build/Dockerfile.dbindexes .  
+docker build -t rsachdeva/illuminatingdeposits.dbindexes:v1.3.01 -f ./build/Dockerfile.dbindexes .  
 
 docker push rsachdeva/illuminatingdeposits.grpc.server:v1.4.0
 docker push rsachdeva/illuminatingdeposits.dbindexes:v1.4.0
