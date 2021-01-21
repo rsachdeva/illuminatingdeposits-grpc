@@ -21,9 +21,7 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
-              name: httpserver
-            - containerPort: 4000
-              name: debug
+              name: grpcserver
           env:
             - name: DEPOSITS_GRPC_SERVICE_TLS
               value: "true"
@@ -41,16 +39,11 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - name: httpserver
-      port: 3000
+    - name: grpcserver
+      port: 50052
       protocol: TCP
       # for container
-      targetPort: 3000
-    - name: debug
-      port: 4000
-      protocol: TCP
-      # for container
-      targetPort: 4000
+      targetPort: 50052
   selector:
     app: grpcserversvc
 ---
@@ -76,13 +69,13 @@ metadata:
   name: grpcserversvc
   annotations:
     kubernetes.io/ingress.class: nginx
-    # https://stackoverflow.com/questions/64647258/how-nginx-ingress-controller-back-end-protocol-annotation-works-in-path-based-ro
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+#    # https://stackoverflow.com/questions/64647258/how-nginx-ingress-controller-back-end-protocol-annotation-works-in-path-based-ro
+#    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
-  tls:
-    - hosts:
-       - grpcserversvc.127.0.0.1.nip.io
-      secretName: illuminatingdeposits-grpc-secret-tls
+#  tls:
+#    - hosts:
+#       - grpcserversvc.127.0.0.1.nip.io
+#      secretName: illuminatingdeposits-grpc-secret-tls
   rules:
     - host: grpcserversvc.127.0.0.1.nip.io
       http:
@@ -91,12 +84,4 @@ spec:
             backend:
               serviceName: grpcserversvc
               #  for service port exposed; not for container directly
-              servicePort: 3000
-    - host: debugdepositsgrpc.127.0.0.1.nip.io
-      http:
-        paths:
-            - path: /debug/pprof
-              backend:
-                serviceName: grpcserversvc
-                #  for service port exposed; not for container directly
-                servicePort: 4000
+              servicePort: 50052
