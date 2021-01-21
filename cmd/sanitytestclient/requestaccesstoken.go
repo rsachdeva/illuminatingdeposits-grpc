@@ -54,7 +54,7 @@ func accessToken(conn *grpc.ClientConn, useExpired bool, email string) (string, 
 
 func createToken(conn *grpc.ClientConn, email string) (string, error) {
 	// Set up a connection to the server.
-	fmt.Println("executing createToken")
+	log.Println("=============executing createToken=============")
 
 	fmt.Println("calling NewUserMgmtServiceClient(conn)")
 	uAuthnSvcClient := userauthnpb.NewUserAuthnServiceClient(conn)

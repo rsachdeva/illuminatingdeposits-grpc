@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
         - name: dbindexes
-          image: rsachdeva/illuminatingdeposits.dbindexes:v1.3.01
+          image: rsachdeva/illuminatingdeposits.dbindexes:v1.4.0
           imagePullPolicy: IfNotPresent
           command:
             - "bash"

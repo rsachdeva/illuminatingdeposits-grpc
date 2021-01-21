@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: grpcserversvc
-          image: rsachdeva/illuminatingdeposits.grpc.server:v1.3.01
+          image: rsachdeva/illuminatingdeposits.grpc.server:v1.4.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 50052
@@ -29,8 +29,8 @@ spec:
               value: "0.0.0.0:50052"
             - name: DEPOSITS_GRPC_DB_HOST
               value: depositsmongodb
-            - name: GODEBUG
-              value: http2debug=2
+#            - name: GODEBUG
+#              value: http2debug=2
 ---
 apiVersion: v1
 kind: Service

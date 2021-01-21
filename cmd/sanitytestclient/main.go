@@ -34,9 +34,6 @@ func main() {
 	if tls {
 		opts = []grpc.DialOption{tlsOption()}
 	}
-	for _, v := range opts {
-		fmt.Printf("initial opts v type is %T and val is %v\n", v, v)
-	}
 
 	conn, err := grpc.Dial(svcAddress(tls), opts...)
 	if err != nil {
@@ -59,9 +56,6 @@ func nonAccessTokenRequests(conn *grpc.ClientConn, email string) {
 func accessTokenRequiredRequests(oaToken *oauth2.Token, tls bool, opts []grpc.DialOption) {
 	oAccess := oauth.NewOauthAccess(oaToken)
 	opts = append(opts, grpc.WithPerRPCCredentials(oAccess))
-	for _, v := range opts {
-		fmt.Printf("Opts v type is %T and val is %v\n", v, v)
-	}
 	connWithToken, err := grpc.Dial(svcAddress(tls), opts...)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -81,7 +75,7 @@ func tlsOption() grpc.DialOption {
 }
 
 func requestMongoDBHealth(conn *grpc.ClientConn) {
-	fmt.Println("executing requestMongoDBHealth")
+	log.Println("=============executing requestMongoDBHealth=============")
 	mdbSvcClient := mongodbhealthpb.NewMongoDbHealthServiceClient(conn)
 	fmt.Println("mdbSvcClient client created")
 	mdbresp, err := mdbSvcClient.Health(context.Background(), &emptypb.Empty{})
@@ -93,7 +87,7 @@ func requestMongoDBHealth(conn *grpc.ClientConn) {
 
 func requestCreateUser(conn *grpc.ClientConn, email string) {
 	// Set up a connection to the server.
-	fmt.Println("executing requestCreateUser")
+	log.Println("=============executing requestCreateUser=============")
 
 	fmt.Println("calling NewUserMgmtServiceClient(conn)")
 	uMgmtSvcClient := usermgmtpb.NewUserMgmtServiceClient(conn)
@@ -118,9 +112,9 @@ func requestCreateUser(conn *grpc.ClientConn, email string) {
 }
 
 func requestCreateInterest(connWithToken *grpc.ClientConn) {
-	fmt.Println("executing requestCreateInterest")
+	log.Println("=============executing requestCreateInterest=============")
 	iCalSvcClient := interestcalpb.NewInterestCalServiceClient(connWithToken)
-	fmt.Printf("iCalSvcClient client created")
+	fmt.Println("iCalSvcClient client created")
 
 	req := interestcalpb.CreateInterestRequest{
 		// &interestcalpb.NewBank is reduntant type

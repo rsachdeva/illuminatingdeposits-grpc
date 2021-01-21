@@ -71,9 +71,6 @@ func TestServiceServer_CreateInterest(t *testing.T) {
 
 	oAccess := oauth.NewOauthAccess(&oaToken)
 	opts = append(opts, grpc.WithPerRPCCredentials(oAccess))
-	for _, v := range opts {
-		fmt.Printf("Opts v type is %T and val is %v\n", v, v)
-	}
 	connWithToken, err := grpc.DialContext(ctx, "localhost", opts...)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)

@@ -4,6 +4,7 @@ package interestcal
 
 import (
 	"fmt"
+	"log"
 	"math"
 
 	"github.com/pkg/errors"
@@ -115,7 +116,7 @@ func compoundInterest(apy float64, years float64, amount float64) float64 {
 }
 
 func earned30days(iEarned float64, years float64) (float64, error) {
-	fmt.Printf("interest cal delta years is %v\n", years)
+	log.Printf("for a deposit requested years is %v\n", years)
 	if years*365 < 30 {
 		return 0, fmt.Errorf("NewDeposit period in years %v should not be less than 30 days", years)
 	}

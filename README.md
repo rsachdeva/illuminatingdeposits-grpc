@@ -45,9 +45,16 @@ generateusermgmtservice.sh
      - all banks!
 - Sanity test client included
 - Docker support 
-- Docker compose deployment for development 
+- Docker compose deployment for development
 
 # Docker Compose Deployment
+
+# TLS files
+```shell
+export DEPOSITS_GRPC_SERVICE_ADDRESS=localhost
+docker build -t tlscert:v0.1 -f ./build/Dockerfile.openssl ./conf/tls && \
+docker run --env DEPOSITS_GRPC_SERVICE_ADDRESS=$DEPOSITS_GRPC_SERVICE_ADDRESS -v $PWD/conf/tls:/tls tlscert:v0.1
+```
 
 # Start mongodb
 ```shell
@@ -63,7 +70,7 @@ docker-compose -f ./deploy/compose/docker-compose.dbindexes.yml up --build
 
 ### To start all services without TLS:
 Make sure DEPOSITS_GRPC_SERVICE_TLS=false in docker-compose.grpc.server.yml
-### To start all services with TLS:
+### To start all services with TLS - this is the way to go in gRPC:
 Make sure DEPOSITS_GRPC_SERVICE_TLS=true in docker-compose.grpc.server.yml
 InterestCal service only supports TLS in gRPC as it carries access token.
 This means users want to transmit security
@@ -79,15 +86,74 @@ docker-compose -f ./deploy/compose/docker-compose.grpc.server.yml up --build
 ```shell
 docker-compose -f ./deploy/compose/docker-compose.grpc.server.yml logs -f --tail 1  
 ``` 
+### Sanity test Client - gRPC Services Endpoints Invoked Externally:
+The server side DEPOSITS_GRPC_SERVICE_TLS should be consistent and set for client also.
+Uncomment any request function if not desired.
+
+```shell
+export GODEBUG=x509ignoreCN=0
+export DEPOSITS_GRPC_SERVICE_TLS=true
+export DEPOSITS_GRPC_SERVICE_ADDRESS=localhost
+go run ./cmd/sanitytestclient
+```
 
 ### Shutdown
 ```shell
 docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml down
 docker-compose -f ./deploy/compose/docker-compose.grpc.server.yml down
 ```
+# Runing from Editor/IDE
+
+### TLS files -same as in Docker compose
+```shell
+export DEPOSITS_GRPC_SERVICE_ADDRESS=localhost
+docker build -t tlscert:v0.1 -f ./build/Dockerfile.openssl ./conf/tls && \
+docker run --env DEPOSITS_GRPC_SERVICE_ADDRESS=$DEPOSITS_GRPC_SERVICE_ADDRESS -v $PWD/conf/tls:/tls tlscert:v0.1
+```
+### Start DB:
+```shell
+export COMPOSE_IGNORE_ORPHANS=True && \
+docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up
+```
+And then run following (./tools/dbindexescli is actually needed only once):
+```shell
+export DEPOSITS_GRPC_SERVICE_TLS=true
+export DEPOSITS_GRPC_DB_HOST=127.0.0.1
+go run ./tools/dbindexescli
+go run ./cmd/server
+```
+
+### Sanity test Client - gRPC Services Endpoints Invoked Externally:
+The server side DEPOSITS_GRPC_SERVICE_TLS should be consistent and set for client also.
+Uncomment any request function if not desired.
+
+```shell
+export GODEBUG=x509ignoreCN=0
+export DEPOSITS_GRPC_SERVICE_TLS=true
+export DEPOSITS_GRPC_SERVICE_ADDRESS=localhost
+go run ./cmd/sanitytestclient
+```
 
 # Kubernetes Deployment
 (for Better control; For Local Setup tested with Docker Desktop latest version with Kubernetes Enabled)
+
+# TLS files
+```shell
+export DEPOSITS_GRPC_SERVICE_ADDRESS=grpcserversvc.127.0.0.1.nip.io
+docker build -t tlscert:v0.1 -f ./build/Dockerfile.openssl ./conf/tls && \
+docker run --env DEPOSITS_GRPC_SERVICE_ADDRESS=$DEPOSITS_GRPC_SERVICE_ADDRESS -v $PWD/conf/tls:/tls tlscert:v0.1
+```
+As a side note, For any troubleshooting, To see openssl version being used in Docker:
+```shell
+docker build -t tlscert:v0.1 -f ./build/Dockerfile.openssl ./conf/tls && \
+docker run -ti -v $PWD/conf/tls:/tls tlscert:v0.1 sh
+```
+You get a prompt
+/tls
+Check version using command:
+```shell
+openssl version
+```
 
 ### Installing Ingress controller
 Using helm to install nginx ingress controller
@@ -110,15 +176,20 @@ kubectl logs -l app.kubernetes.io/name=ingress-nginx -f
 ### Make docker images and Push Images to Docker Hub
 
 ```shell
-docker build -t rsachdeva/illuminatingdeposits.grpc.server:v1.3.01 -f ./build/Dockerfile.grpc.server .  
-docker build -t rsachdeva/illuminatingdeposits.dbindexes:v1.3.01 -f ./build/Dockerfile.dbindexes .  
+docker build -t rsachdeva/illuminatingdeposits.grpc.server:v1.4.0 -f ./build/Dockerfile.grpc.server .  
+docker build -t rsachdeva/illuminatingdeposits.dbindexes:v1.4.0 -f ./build/Dockerfile.dbindexes .  
 
 docker push rsachdeva/illuminatingdeposits.grpc.server:v1.4.0
 docker push rsachdeva/illuminatingdeposits.dbindexes:v1.4.0
-``` 
 ```
 
 ### Quick deploy for all resources
+We only need to set secrets once after tls files have been generated
+```shell
+kubectl delete secret illuminatingdeposits-grpc-secret-tls
+kubectl create --dry-run=client secret tls illuminatingdeposits-grpc-secret-tls --key conf/tls/serverkeyto.pem --cert conf/tls/servercrtto.pem -o yaml > ./deploy/kubernetes/tls-secret-ingress.yaml
+```
+Now lets depoly:
 ```shell
 kubectl apply -f deploy/kubernetes/.
 ```
@@ -144,12 +215,20 @@ And then execute migration/dbindexes data for manual control when getting starte
 ```shell
 kubectl apply -f deploy/kubernetes/dbindexes.yaml
 ```
-And if status for ```kubectl get pod -l job-name=seed | grep "Completed"```
+And if status for ```kubectl get pod -l job-name=dbindexes | grep "Completed"```
 shows completed for dbindexes pod, optionally can be deleted:
 ```shell
 kubectl delete -f deploy/kubernetes/dbindexes.yaml
 ```
 To connect external tool with mongodb to see database internals use port 30010
+
+#### Set up secret
+
+```shell
+kubectl delete secret illuminatingdeposits-grpc-secret-tls
+kubectl create --dry-run=client secret tls illuminatingdeposits-grpc-secret-tls --key conf/tls/serverkeyto.pem --cert conf/tls/servercrtto.pem -o yaml > ./deploy/kubernetes/tls-secret-ingress.yaml
+kubectl apply -f deploy/kubernetes/tls-secret-ingress.yaml
+```
 
 #### Illuminating deposists gRPC server in Kubernetes!
 ```shell
@@ -158,16 +237,7 @@ kubectl apply -f deploy/kubernetes/grpc-server.yaml
 And see logs using
 ```kubectl logs -l app=grpcserversvc -f```
 
-
-
-### Remove all resources / Shutdown
-
-```shell
-kubectl delete -f ./deploy/kubernetes/.
-helm uninstall ingress-nginx
-```
-
-# Sanity test Client - gRPC Services Endpoints Invoked Externally:
+### Sanity test Client - gRPC Services Endpoints Invoked Externally:
 The server side DEPOSITS_GRPC_SERVICE_TLS should be consistent and set for client also.
 Uncomment any request function if not desired.
 
@@ -177,25 +247,19 @@ export DEPOSITS_GRPC_SERVICE_TLS=true
 export DEPOSITS_GRPC_SERVICE_ADDRESS=grpcserversvc.127.0.0.1.nip.io
 go run ./cmd/sanitytestclient
 ```
+With this Sanity test client, you will be able to:
+- get status of Mongo DB
+- add a new user
+- JWT generation for Authentication
+- JWT Authentication for Interest Delta Calculations for each deposit; each bank with all deposits and all banks
+  Quickly confirms Sanity check for set up with Kubernetes/Docker.
+  There are also separate Integration and Unit tests.
+  
+### Remove all resources / Shutdown
 
-# TLS files
 ```shell
-docker build -t tlscert:v0.1 -f ./build/Dockerfile.openssl ./conf/tls && \
-docker run -v $PWD/conf/tls:/tls tlscert:v0.1
-``` 
-
-To see openssl version being used in Docker:
-```shell
-docker build -t tlscert:v0.1 -f ./build/Dockerfile.openssl ./conf/tls && \
-docker run -ti -v $PWD/conf/tls:/tls tlscert:v0.1 sh
-```
-
-You get a prompt
-/tls 
-
-Check version using command:
-```shell
-openssl version
+kubectl delete -f ./deploy/kubernetes/.
+helm uninstall ingress-nginx
 ```
 
 # Running Integration/Unit tests
@@ -247,20 +311,6 @@ And if mongodb not connecting for tests: (reference: https://www.xspdf.com/help/
 docker volume rm $(docker volume ls -qf dangling=true)
 ```
 
-# Editor/IDE development without docker/docker compose/kubernetes as described above
-Execute:
-```shell
-export COMPOSE_IGNORE_ORPHANS=True && \
-docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up
-```
-And then run following:
-```shell
-export DEPOSITS_GRPC_SERVICE_TLS=true
-export DEPOSITS_GRPC_DB_HOST=127.0.0.1
-go run ./tools/dbindexescli  (only once)
-go run ./cmd/server
-```
-
 # Troubleshooting
 If for any reason no connection is happening from client to server or client hangs or server start up issues:
 Run 
@@ -271,7 +321,9 @@ or
 ```
 ps aux | grep "go_build" 
 ```
-to confirm is something else is already running
+to confirm is something else is already running.
+Make sure to follow above TLS set up according to Kubernetes deployment, Docker compose deployment or Running from Editor.
+Make sure to follow Ingress controller installation for Kubernetes deployment.
 
 # Version
-v1.3.50
+v1.4.0
