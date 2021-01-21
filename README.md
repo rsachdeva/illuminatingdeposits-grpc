@@ -136,8 +136,6 @@ kubectl delete -f deploy/kubernetes/dbindexes.yaml
 kubectl apply -f deploy/kubernetes/mongodb.yaml
 ```
 
-
-
 #### Then Migrate and set up dbindexes data manually for more control initially:
 First should see in logs
 database system is ready to accept connections
@@ -173,8 +171,10 @@ helm uninstall ingress-nginx
 The server side DEPOSITS_GRPC_SERVICE_TLS should be consistent and set for client also.
 Uncomment any request function if not desired.
 
-```shell 
+```shell
 export GODEBUG=x509ignoreCN=0
+export DEPOSITS_GRPC_SERVICE_TLS=true
+export DEPOSITS_GRPC_SERVICE_ADDRESS=grpcserversvc.127.0.0.1.nip.io
 go run ./cmd/sanitytestclient
 ```
 
@@ -274,4 +274,4 @@ ps aux | grep "go_build"
 to confirm is something else is already running
 
 # Version
-v1.3.01
+v1.3.50

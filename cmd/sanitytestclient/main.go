@@ -24,7 +24,6 @@ import (
 )
 
 const (
-	address  = "localhost:50052"
 	emailFmt = "growth-%v@drinnovations.us"
 )
 
@@ -39,7 +38,7 @@ func main() {
 		fmt.Printf("initial opts v type is %T and val is %v\n", v, v)
 	}
 
-	conn, err := grpc.Dial(address, opts...)
+	conn, err := grpc.Dial(svcAddress(tls), opts...)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
@@ -49,7 +48,7 @@ func main() {
 	// replace alrerady persisted email if requestCreateUser is not desired in nonAccessTokenRequests
 	// otherwise user not found error will happen
 	oaToken := requestAccessToken(conn, email, false)
-	accessTokenRequiredRequests(oaToken, opts)
+	accessTokenRequiredRequests(oaToken, tls, opts)
 }
 
 func nonAccessTokenRequests(conn *grpc.ClientConn, email string) {
@@ -57,13 +56,13 @@ func nonAccessTokenRequests(conn *grpc.ClientConn, email string) {
 	requestCreateUser(conn, email)
 }
 
-func accessTokenRequiredRequests(oaToken *oauth2.Token, opts []grpc.DialOption) {
+func accessTokenRequiredRequests(oaToken *oauth2.Token, tls bool, opts []grpc.DialOption) {
 	oAccess := oauth.NewOauthAccess(oaToken)
 	opts = append(opts, grpc.WithPerRPCCredentials(oAccess))
 	for _, v := range opts {
 		fmt.Printf("Opts v type is %T and val is %v\n", v, v)
 	}
-	connWithToken, err := grpc.Dial(address, opts...)
+	connWithToken, err := grpc.Dial(svcAddress(tls), opts...)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}

@@ -1,1 +1,1 @@
-kubectl create secret tls illuminatingdeposits-rest-secret-tls --key conf/tls/serverkeyto.pem --cert conf/tls/servercrtto.pem
+kubectl create secret tls illuminatingdeposits-grpc-secret-tls --key conf/tls/serverkeyto.pem --cert conf/tls/servercrtto.pem
