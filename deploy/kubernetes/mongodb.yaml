@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/component: mongodb
 spec:
   serviceName: "mongodb"
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: mongodb
@@ -34,11 +34,26 @@ spec:
             requests: {}
           volumeMounts:
             - name: datadir
-              mountPath: /var/lib/mongodb/data
+              mountPath: /data/db
       volumes:
         - name: datadir
           persistentVolumeClaim:
             claimName: mongodb
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: mongo-pv
+  labels:
+    app: mongodb-pv
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 3Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/Users/growth/drinnovations/mywork_jmd/godrinnovationsus/illuminatingdeposits-grpc/deploy/kubernetes/mongo-kubernetes-volume"
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -50,12 +65,12 @@ metadata:
     app.kubernetes.io/instance: mongodb
     app.kubernetes.io/component: mongodb
 spec:
-  storageClassName: hostpath
+  storageClassName: manual
   accessModes:
     - "ReadWriteOnce"
   resources:
     requests:
-      storage: "2Gi"
+      storage: "3Gi"
   selector:
     matchLabels:
       app: mongodb-pv

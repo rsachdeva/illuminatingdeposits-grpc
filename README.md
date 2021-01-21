@@ -116,15 +116,16 @@ docker build -t rsachdeva/illuminatingdeposits.dbindexes:v1.3.01 -f ./build/Dock
 docker push rsachdeva/illuminatingdeposits.grpc.server:v1.4.0
 docker push rsachdeva/illuminatingdeposits.dbindexes:v1.4.0
 ``` 
+```
 
 ### Quick deploy for all resources
 ```shell
 kubectl apply -f deploy/kubernetes/.
 ```
-If status for ```kubectl get pod -l job-name=seed | grep "Completed"```
-shows completed for seed pod, optionally can be deleted:
+If status for ```kubectl get pod -l job-name=dbindexes | grep "Completed"```
+shows completed for dbindexes pod, optionally can be deleted:
 ```shell
-kubectl delete -f deploy/kubernetes/seed.yaml
+kubectl delete -f deploy/kubernetes/dbindexes.yaml
 ```
 
 ### Detailed - Step by Step
@@ -132,35 +133,25 @@ kubectl delete -f deploy/kubernetes/seed.yaml
 ##### Start mongodb service
 
 ```shell
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm install mongodb -f ./deploy/kubernetes/mongodb/helm-values.yaml bitnami/mongodb
-```
-To see values applied see:
-```shell
-helm template mongodb -f ./deploy/kubernetes/mongodb/helm-values.yaml bitnami/mongodb
+kubectl apply -f deploy/kubernetes/mongodb.yaml
 ```
 
 
-#### Then Migrate and set up seed data manually for more control initially:
+
+#### Then Migrate and set up dbindexes data manually for more control initially:
 First should see in logs
 database system is ready to accept connections
-```kubectl logs pod/postgres-deposits-0```
-And then execute migration/seed data for manual control when getting started:
+```kubectl logs pod/mongodb-deposits-0```
+And then execute migration/dbindexes data for manual control when getting started:
 ```shell
-kubectl apply -f deploy/kubernetes/seed.yaml
+kubectl apply -f deploy/kubernetes/dbindexes.yaml
 ```
 And if status for ```kubectl get pod -l job-name=seed | grep "Completed"```
-shows completed for seed pod, optionally can be deleted:
+shows completed for dbindexes pod, optionally can be deleted:
 ```shell
-kubectl delete -f deploy/kubernetes/seed.yaml
+kubectl delete -f deploy/kubernetes/dbindexes.yaml
 ```
-To connect external tool with postgres to see database internals use:
-Use a connection string similar to:
-jdbc:postgresql://127.0.0.1:30007/postgres
-If still an issue you can try
-kubectl port-forward service/postgres 5432:postgres
-Now can easily connect using
-jdbc:postgresql://localhost:5432/postgres
+To connect external tool with mongodb to see database internals use port 30010
 
 #### Illuminating deposists gRPC server in Kubernetes!
 ```shell
