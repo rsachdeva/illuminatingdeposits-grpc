@@ -28,7 +28,7 @@ spec:
             - name: DEPOSITS_WEB_ADDRESS
               value: "0.0.0.0:50052"
             - name: DEPOSITS_GRPC_DB_HOST
-              value: depositsmongodb
+              value: mongo
 #            - name: GODEBUG
 #              value: http2debug=2
 ---

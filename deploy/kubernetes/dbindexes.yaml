@@ -18,5 +18,5 @@ spec:
             - "./dbindexescli"
           env:
             - name: DEPOSITS_GRPC_DB_HOST
-              value: depositsmongodb
+              value: mongo
       restartPolicy: Never

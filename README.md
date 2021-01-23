@@ -46,6 +46,7 @@ generateusermgmtservice.sh
 - Sanity test client included
 - Docker support 
 - Docker compose deployment for development
+- Kubernetes Deployment with Ingress; Helm; Mongodb internal replication setup
 
 # Docker Compose Deployment
 
@@ -137,7 +138,7 @@ go run ./cmd/sanitytestclient
 # Kubernetes Deployment
 (for Better control; For Local Setup tested with Docker Desktop latest version with Kubernetes Enabled)
 
-# TLS files
+### TLS files
 ```shell
 export DEPOSITS_GRPC_SERVICE_ADDRESS=grpcserversvc.127.0.0.1.nip.io
 docker build -t tlscert:v0.1 -f ./build/Dockerfile.openssl ./conf/tls && \
@@ -183,14 +184,48 @@ docker push rsachdeva/illuminatingdeposits.grpc.server:v1.4.0
 docker push rsachdeva/illuminatingdeposits.dbindexes:v1.4.0
 ```
 
-### Quick deploy for all resources
-We only need to set secrets once after tls files have been generated
+### Quick deploy for all Kubernetes resources
+TLS File set up should have been installed using steps above.
+```shell
+helm install ingress-nginx -f ./deploy/kubernetes/nginx-ingress-controller/helm-values.yaml ingress-nginx/ingress-nginx
+```
+MongoDB set up with internal replication has to be done once unless persistent volumes ae deleted or
+number of replicas are changed:
+```shell
+kubectl apply -f deploy/kubernetes/mongodb/.
+```
+Once all mongo pods are running, we have to do this once: ( unless we change replication pods)
+
+#### Mongodb internal replication setup
+Inside the mongo-0 pod we open a mongo shell:
+```shell
+kubectl exec -it mongo-0 -- mongo
+```
+Then inside shell:
+```shell
+rs.initiate({
+      _id: "rs0",
+      members: [
+         { _id: 0, host : "mongo-0.mongo.default.svc.cluster.local:27017" },
+         {_id: 1, host: "mongo-1.mongo.default.svc.cluster.local:27017"},
+         {_id: 2, host: "mongo-2.mongo.default.svc.cluster.local:27017"}
+      ]
+   }
+)
+#  wait till you get 1 primary
+rs.status()
+```
+Allows connecting MongoDB UI using NodePort at 30010 from outside cluster locally to view data.
+We only need to set secrets once after tls files have been generated; This is using dry run:
 ```shell
 kubectl delete secret illuminatingdeposits-grpc-secret-tls
 kubectl create --dry-run=client secret tls illuminatingdeposits-grpc-secret-tls --key conf/tls/serverkeyto.pem --cert conf/tls/servercrtto.pem -o yaml > ./deploy/kubernetes/tls-secret-ingress.yaml
 ```
-Now lets depoly:
+Now lets depoly the grpc application related resources:
 ```shell
+# in case not built -- refer 'Make docker images and Push Images to Docker Hub'
+docker build -t rsachdeva/illuminatingdeposits.grpc.server:v1.4.0 -f ./build/Dockerfile.grpc.server .  
+docker build -t rsachdeva/illuminatingdeposits.dbindexes:v1.4.0 -f ./build/Dockerfile.dbindexes . 
 kubectl apply -f deploy/kubernetes/.
 ```
 If status for ```kubectl get pod -l job-name=dbindexes | grep "Completed"```
@@ -199,13 +234,33 @@ shows completed for dbindexes pod, optionally can be deleted:
 kubectl delete -f deploy/kubernetes/dbindexes.yaml
 ```
 
-### Detailed - Step by Step
+### Sanity test Client - gRPC Services Endpoints Invoked Externally:
+The server side DEPOSITS_GRPC_SERVICE_TLS should be consistent and set for client also.
+Uncomment any request function if not desired.
 
+```shell
+export GODEBUG=x509ignoreCN=0
+export DEPOSITS_GRPC_SERVICE_TLS=true
+export DEPOSITS_GRPC_SERVICE_ADDRESS=grpcserversvc.127.0.0.1.nip.io
+go run ./cmd/sanitytestclient
+```
+With this Sanity test client, you will be able to:
+- get status of Mongo DB
+- add a new user
+- JWT generation for Authentication
+- JWT Authentication for Interest Delta Calculations for each deposit; each bank with all deposits and all banks
+  Quickly confirms Sanity check for set up with Kubernetes/Docker.
+  There are also separate Integration and Unit tests.
+  
+### Detailed Kubernetes set up - Step by Step
+See 'Quick deploy for all Kubernetes resources' above. If any issues, you can follow detailed steps.
+TLS File set up and Ingress controller should have been installed using steps above.
 ##### Start mongodb service
 
 ```shell
-kubectl apply -f deploy/kubernetes/mongodb.yaml
+kubectl apply -f deploy/kubernetes/mongodb/mongodb.yaml
 ```
+See above 'Mongodb internal replication setup' in Quick deploy.
 
 #### Then Migrate and set up dbindexes data manually for more control initially:
 First should see in logs
@@ -236,32 +291,20 @@ kubectl apply -f deploy/kubernetes/grpc-server.yaml
 ```
 And see logs using
 ```kubectl logs -l app=grpcserversvc -f```
-
-### Sanity test Client - gRPC Services Endpoints Invoked Externally:
-The server side DEPOSITS_GRPC_SERVICE_TLS should be consistent and set for client also.
-Uncomment any request function if not desired.
-
-```shell
-export GODEBUG=x509ignoreCN=0
-export DEPOSITS_GRPC_SERVICE_TLS=true
-export DEPOSITS_GRPC_SERVICE_ADDRESS=grpcserversvc.127.0.0.1.nip.io
-go run ./cmd/sanitytestclient
-```
-With this Sanity test client, you will be able to:
-- get status of Mongo DB
-- add a new user
-- JWT generation for Authentication
-- JWT Authentication for Interest Delta Calculations for each deposit; each bank with all deposits and all banks
-  Quickly confirms Sanity check for set up with Kubernetes/Docker.
-  There are also separate Integration and Unit tests.
   
 ### Remove all resources / Shutdown
 
 ```shell
 kubectl delete -f ./deploy/kubernetes/.
+kubectl delete -f ./deploy/kubernetes/mongodb/.
 helm uninstall ingress-nginx
 ```
-
+This does not remove prestient volume.
+In case you are sure, you want to loose data only then
+```shell
+kubectl get pvc
+kubectl delete pvc -l app=mongo 
+```
 # Running Integration/Unit tests
 Tests are designed to run in parallel with its own test server and docker based mongodb using dockertest.
 To run all tests with coverages reports for focussed packages:
@@ -324,6 +367,10 @@ ps aux | grep "go_build"
 to confirm is something else is already running.
 Make sure to follow above TLS set up according to Kubernetes deployment, Docker compose deployment or Running from Editor.
 Make sure to follow Ingress controller installation for Kubernetes deployment.
+Otherwise you will get error as:
+```
+transport: Error while dialing dial tcp
+```
 
 # Version
 v1.4.0
