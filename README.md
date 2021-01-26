@@ -32,7 +32,7 @@ generateusermgmtservice.sh
 # Features include:
 - Golang (Go) gRPC Service Methods with protobuf for Messages
 - TLS for all requests
-- Integration and Unit tests run in parallel
+- Integration and Unit tests; run in parallel using dockertest for faster feedback
 - Coverage Result for key packages
 - MongoDB health check service
 - User Management service with MongoDB for user creation
@@ -43,10 +43,11 @@ generateusermgmtservice.sh
      - each deposit 
      - each bank with all deposits
      - all banks!
-- Sanity test client included
-- Docker support 
+- Sanity test client included for settings for each deployment
+- Dockering and using it for both Docker Compose and Kubernetes
 - Docker compose deployment for development
 - Kubernetes Deployment with Ingress; Helm; Mongodb internal replication setup
+- Running from Editor/IDE directly included
 
 # Docker Compose Deployment
 
