@@ -1,27 +1,5 @@
 # Illuminating Deposits - gRPC
 
-#### gRPC pre setup  (in case desired to generate already included protobuf code)
-
-```
-brew install protobuf
-``` 
-Enable module mode (or just execute next command from any directory outside of project having go.mod)
-Reference: https://grpc.io/docs/languages/go/quickstart/
-```shell
-brew install protobuf
-protoc --version  # Ensure compiler version is 3+
-# install Go plugins for the protocol compiler protoc
-export GO111MODULE=on  
-go get google.golang.org/protobuf/cmd/protoc-gen-go google.golang.org/grpc/cmd/protoc-gen-go-grpc 
-```
-
-Now go to this project root directory and run following scripts for generating protobuf related code for the services:
-```
-generateinterestcalservice.sh
-generatemongodbhealthservice.sh
-generateusermgmtservice.sh 
-```
-
 ###### All commands should be executed from the root directory (illuminatingdeposits-grpc) of the project
 (Development is WIP)
 
@@ -43,22 +21,47 @@ generateusermgmtservice.sh
      - each deposit 
      - each bank with all deposits
      - all banks!
+- Concurrency support for computing Banks Delta included for more I/O processing
 - Sanity test client included for settings for each deployment
 - Dockering and using it for both Docker Compose and Kubernetes
 - Docker compose deployment for development
 - Kubernetes Deployment with Ingress; Helm; Mongodb internal replication setup
 - Running from Editor/IDE directly included
 
+#### gRPC pre setup  (in case desired to generate already included protobuf code)
+This should not be needed when deploying; it is there for reference to how protobuf
+and related code was generated.
+
+```
+brew install protobuf
+``` 
+Enable module mode (or just execute next command from any directory outside of project having go.mod)
+Reference: https://grpc.io/docs/languages/go/quickstart/
+```shell
+brew install protobuf
+protoc --version  # Ensure compiler version is 3+
+# install Go plugins for the protocol compiler protoc
+export GO111MODULE=on  
+go get google.golang.org/protobuf/cmd/protoc-gen-go google.golang.org/grpc/cmd/protoc-gen-go-grpc 
+```
+
+Now go to this project root directory and run following scripts for generating protobuf related code for the services:
+```
+generateinterestcalservice.sh
+generatemongodbhealthservice.sh
+generateusermgmtservice.sh 
+```
+
 # Docker Compose Deployment
 
-# TLS files
+### TLS files
 ```shell
 export DEPOSITS_GRPC_SERVICE_ADDRESS=localhost
 docker build -t tlscert:v0.1 -f ./build/Dockerfile.openssl ./conf/tls && \
 docker run --env DEPOSITS_GRPC_SERVICE_ADDRESS=$DEPOSITS_GRPC_SERVICE_ADDRESS -v $PWD/conf/tls:/tls tlscert:v0.1
 ```
 
-# Start mongodb
+### Start mongodb
 ```shell
 export COMPOSE_IGNORE_ORPHANS=True && \
 docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up 
@@ -178,19 +181,20 @@ kubectl logs -l app.kubernetes.io/name=ingress-nginx -f
 ### Make docker images and Push Images to Docker Hub
 
 ```shell
-docker build -t rsachdeva/illuminatingdeposits.grpc.server:v1.4.0 -f ./build/Dockerfile.grpc.server .  
-docker build -t rsachdeva/illuminatingdeposits.dbindexes:v1.4.0 -f ./build/Dockerfile.dbindexes .  
+docker build -t rsachdeva/illuminatingdeposits.grpc.server:v1.5.0 -f ./build/Dockerfile.grpc.server .  
+docker build -t rsachdeva/illuminatingdeposits.dbindexes:v1.5.0 -f ./build/Dockerfile.dbindexes .  
 
-docker push rsachdeva/illuminatingdeposits.grpc.server:v1.4.0
-docker push rsachdeva/illuminatingdeposits.dbindexes:v1.4.0
+docker push rsachdeva/illuminatingdeposits.grpc.server:v1.5.0
+docker push rsachdeva/illuminatingdeposits.dbindexes:v1.5.0
 ```
+The v1.5.0 should match to version being used in Kubernetes resources (grpc-server.yaml; dbindexes.yaml).
 
-### Quick deploy for all Kubernetes resources
+### Quick deploy for all Kubernetes resources ( more Detailed Kubernetes set up - Step by Step is below)
 TLS File set up should have been installed using steps above.
 ```shell
 helm install ingress-nginx -f ./deploy/kubernetes/nginx-ingress-controller/helm-values.yaml ingress-nginx/ingress-nginx
 ```
-MongoDB set up with internal replication has to be done once unless persistent volumes ae deleted or
+MongoDB set up with internal replication has to be done once unless persistent volumes are deleted or
 number of replicas are changed:
 ```shell
 kubectl apply -f deploy/kubernetes/mongodb/.
@@ -225,8 +229,8 @@ kubectl create --dry-run=client secret tls illuminatingdeposits-grpc-secret-tls 
 Now lets depoly the grpc application related resources:
 ```shell
 # in case not built -- refer 'Make docker images and Push Images to Docker Hub'
-docker build -t rsachdeva/illuminatingdeposits.grpc.server:v1.4.0 -f ./build/Dockerfile.grpc.server .  
-docker build -t rsachdeva/illuminatingdeposits.dbindexes:v1.4.0 -f ./build/Dockerfile.dbindexes . 
+docker build -t rsachdeva/illuminatingdeposits.grpc.server:v1.5.0 -f ./build/Dockerfile.grpc.server .  
+docker build -t rsachdeva/illuminatingdeposits.dbindexes:v1.5.0 -f ./build/Dockerfile.dbindexes . 
 kubectl apply -f deploy/kubernetes/.
 ```
 If status for ```kubectl get pod -l job-name=dbindexes | grep "Completed"```
@@ -234,6 +238,8 @@ shows completed for dbindexes pod, optionally can be deleted:
 ```shell
 kubectl delete -f deploy/kubernetes/dbindexes.yaml
 ```
+And see logs using
+```kubectl logs -l app=grpcserversvc -f```
 
 ### Sanity test Client - gRPC Services Endpoints Invoked Externally:
 The server side DEPOSITS_GRPC_SERVICE_TLS should be consistent and set for client also.
@@ -301,7 +307,7 @@ kubectl delete -f ./deploy/kubernetes/mongodb/.
 helm uninstall ingress-nginx
 ```
 This does not remove prestient volume.
-In case you are sure, you want to loose data only then
+In case you are sure, you don't want to keep data only then
 ```shell
 kubectl get pvc
 kubectl delete pvc -l app=mongo 
@@ -310,7 +316,7 @@ kubectl delete pvc -l app=mongo
 Tests are designed to run in parallel with its own test server and docker based mongodb using dockertest.
 To run all tests with coverages reports for focussed packages:
 Run following only once as tests use this image; so faster:
-```shell 
+```shell
 docker pull mongo:4.4.2-bionic 
 ``` 
 And then run the following with coverages for key packages concerned:
@@ -320,7 +326,10 @@ go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbh
 go test -v -count=1 -covermode=count -coverpkg=./userauthn,./usermgmt,./mongodbhealth,./interestcal -coverprofile cover.out ./... && go tool cover -html cover.out
 ```
 Coverage Result for key packages: 
-**total:	(statements)	91.9%**  
+**total:	(statements)	92.5%**  
+<p align="center">
+<img src="./coverageresults.png" alt="Illuminating Deposits gRPC Test Coverage" title="lluminating Deposits gRPC Test Coverage" />
+</p>
 
 The -v is for Verbose output: log all tests as they are run. Search "FAIL:" in parallel test output here to see reason for failure
 in case any test fails.
@@ -374,4 +383,4 @@ transport: Error while dialing dial tcp
 ```
 
 # Version
-v1.4.0
+v1.5.0

@@ -147,6 +147,51 @@ func requestCreateInterest(connWithToken *grpc.ClientConn) {
 				},
 			},
 			{
+				Name: "CLONED",
+				NewDeposits: []*interestcalpb.NewDeposit{
+					{
+						Account:     "1234",
+						AccountType: "Checking",
+						Apy:         0,
+						Years:       1,
+						Amount:      100,
+					},
+					{
+						Account:     "1256",
+						AccountType: "CD",
+						Apy:         24,
+						Years:       2,
+						Amount:      10700,
+					},
+					{
+						Account:     "1111",
+						AccountType: "CD",
+						Apy:         1.01,
+						Years:       10,
+						Amount:      27000,
+					},
+				},
+			},
+			{
+				Name: "CALM",
+				NewDeposits: []*interestcalpb.NewDeposit{
+					{
+						Account:     "2662",
+						AccountType: "Brokered CD",
+						Apy:         6,
+						Years:       7,
+						Amount:      12662,
+					},
+					{
+						Account:     "2552",
+						AccountType: "CD",
+						Apy:         2.22,
+						Years:       8,
+						Amount:      12552,
+					},
+				},
+			},
+			{
 				Name: "NICE",
 				NewDeposits: []*interestcalpb.NewDeposit{
 					{

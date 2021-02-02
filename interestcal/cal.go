@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"sync"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
@@ -23,9 +25,26 @@ const (
 	Br = "Brokered CD"
 )
 
+func timeTrack(start time.Time, name string) {
+	elapsed := time.Since(start)
+	log.Printf("%s took %s", name, elapsed)
+}
+
 // CalculateDelta calculations for all banks
+// by default withConcurrency is passed as true for more stuff to add
 func CalculateDelta(cireq *interestcalpb.CreateInterestRequest) (*interestcalpb.CreateInterestResponse, error) {
-	bks, delta, err := computeBanksDelta(cireq)
+	defer timeTrack(time.Now(), "CalculateDelta timed with withConcurrency for more I/O processing")
+	var bks []*interestcalpb.Bank
+	var delta float64
+	var err error
+	// withConcurrency := true
+	// if withConcurrency {
+	// 	bks, delta, err = computeBanksDelta(cireq)
+	// }
+	// if !withConcurrency {
+	// 	bks, delta, err = computeBanksDeltaSequentially(cireq)
+	// }
+	bks, delta, err = computeBanksDelta(cireq)
 	if err != nil {
 		return &interestcalpb.CreateInterestResponse{}, err
 	}
@@ -36,18 +55,94 @@ func CalculateDelta(cireq *interestcalpb.CreateInterestRequest) (*interestcalpb.
 	return &ciresp, nil
 }
 
+// func computeBanksDeltaSequentially(cireq *interestcalpb.CreateInterestRequest) ([]*interestcalpb.Bank, float64, error) {
+// 	var bks []*interestcalpb.Bank
+// 	var delta float64
+// 	for _, nb := range cireq.NewBanks {
+// 		ds, bDelta, err := computeBankDeltaNoChannel(nb)
+// 		if err != nil {
+// 			return nil, 0, err
+// 		}
+// 		bk := interestcalpb.Bank{
+// 			Name:     nb.Name,
+// 			Deposits: ds,
+// 			Delta:    roundToNearest(bDelta),
+// 		}
+// 		bks = append(bks, &bk)
+// 		delta = delta + bk.Delta
+// 	}
+// 	return bks, delta, nil
+// }
+//
+// func computeBankDeltaNoChannel(nb *interestcalpb.NewBank) ([]*interestcalpb.Deposit, float64, error) {
+// 	// time.Sleep(5 * time.Second)
+// 	var ds []*interestcalpb.Deposit
+// 	var bDelta float64
+// 	for _, nd := range nb.NewDeposits {
+// 		d := interestcalpb.Deposit{
+// 			Account:     nd.Account,
+// 			AccountType: nd.AccountType,
+// 			Apy:         nd.Apy,
+// 			Years:       nd.Years,
+// 			Amount:      nd.Amount,
+// 		}
+// 		err := computeDepositDelta(&d)
+// 		if err != nil {
+// 			return nil, 0, err
+// 		}
+// 		ds = append(ds, &d)
+// 		bDelta = bDelta + d.Delta
+// 	}
+// 	return ds, bDelta, nil
+// }
+
+type BankResult struct {
+	name   string
+	ds     []*interestcalpb.Deposit
+	bDelta float64
+	err    error
+}
+
 func computeBanksDelta(cireq *interestcalpb.CreateInterestRequest) ([]*interestcalpb.Bank, float64, error) {
 	var bks []*interestcalpb.Bank
 	var delta float64
-	for _, nb := range cireq.NewBanks {
-		ds, bDelta, err := computeBankDelta(nb)
-		if err != nil {
-			return nil, 0, err
+	bkCh := make(chan BankResult)
+	// so as to know when to close channel
+	var waitGroup sync.WaitGroup
+
+	// for all banks just 1 go routine
+	// go func() {
+	// 	for _, nb := range cireq.NewBanks {
+	// 		// ds, bDelta, err := computeBankDelta(nb)
+	// 		// doing for each bank calculation concurrently
+	// 		computeBankDelta(nb, bkCh)
+	// 	}
+	// 	close(bkCh)
+	// }()
+
+	// for each bank calculation with all deposists 1 goroutine
+	// fmt.Println("len(cireq.NewBanks) is", len(cireq.NewBanks))
+	waitGroup.Add(len(cireq.NewBanks))
+	for i, nb := range cireq.NewBanks {
+		go func(i int, nb *interestcalpb.NewBank) {
+			defer waitGroup.Done()
+			computeBankDelta(nb, bkCh)
+		}(i, nb)
+	}
+
+	go func() {
+		waitGroup.Wait()
+		close(bkCh)
+	}()
+
+	for bkRes := range bkCh {
+		if bkRes.err != nil {
+			return nil, 0, bkRes.err
 		}
 		bk := interestcalpb.Bank{
-			Name:     nb.Name,
-			Deposits: ds,
-			Delta:    roundToNearest(bDelta),
+			Name:     bkRes.name,
+			Deposits: bkRes.ds,
+			Delta:    roundToNearest(bkRes.bDelta),
 		}
 		bks = append(bks, &bk)
 		delta = delta + bk.Delta
@@ -55,7 +150,9 @@ func computeBanksDelta(cireq *interestcalpb.CreateInterestRequest) ([]*interestc
 	return bks, delta, nil
 }
 
-func computeBankDelta(nb *interestcalpb.NewBank) ([]*interestcalpb.Deposit, float64, error) {
+// return []*interestcalpb.Deposit, float64, error now in channel
+func computeBankDelta(nb *interestcalpb.NewBank, bkCh chan<- BankResult) {
+	// time.Sleep(5 * time.Second) - for more upcoming I/O processing
 	var ds []*interestcalpb.Deposit
 	var bDelta float64
 	for _, nd := range nb.NewDeposits {
@@ -67,13 +164,29 @@ func computeBankDelta(nb *interestcalpb.NewBank) ([]*interestcalpb.Deposit, floa
 			Amount:      nd.Amount,
 		}
 		err := computeDepositDelta(&d)
+		// if err != nil {
+		// 	return nil, 0, err
+		// }
+		// Sending err result
 		if err != nil {
-			return nil, 0, err
+			bkCh <- BankResult{
+				name:   "",
+				ds:     nil,
+				bDelta: 0,
+				err:    err,
+			}
 		}
 		ds = append(ds, &d)
 		bDelta = bDelta + d.Delta
 	}
-	return ds, bDelta, nil
+	// return ds, bDelta, nil
+	bkRes := BankResult{
+		name:   nb.Name,
+		ds:     ds,
+		bDelta: bDelta,
+		err:    nil,
+	}
+	bkCh <- bkRes
 }
 
 // CalculateDelta calculates interest for 30 days for output/response Deposit
@@ -116,7 +229,6 @@ func compoundInterest(apy float64, years float64, amount float64) float64 {
 }
 
 func earned30days(iEarned float64, years float64) (float64, error) {
-	log.Printf("for a deposit requested years is %v\n", years)
 	if years*365 < 30 {
 		return 0, fmt.Errorf("NewDeposit period in years %v should not be less than 30 days", years)
 	}
