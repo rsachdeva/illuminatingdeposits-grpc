@@ -1,6 +1,6 @@
 # Runs from root directory of the appserver for build context
 
-FROM golang:1.15.0-alpine AS build
+FROM golang:1.16-alpine AS build
 WORKDIR /illuminatingdeposits
 COPY go.mod .
 RUN go mod download

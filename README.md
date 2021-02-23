@@ -36,20 +36,24 @@ and related code was generated.
 brew install protobuf
 ``` 
 Enable module mode (or just execute next command from any directory outside of project having go.mod)
-Reference: https://grpc.io/docs/languages/go/quickstart/
+Reference: [QuickStart](https://grpc.io/docs/languages/go/quickstart/)
 ```shell
 brew install protobuf
 protoc --version  # Ensure compiler version is 3+
 # install Go plugins for the protocol compiler protoc
+# before go 1.16
 export GO111MODULE=on  
 go get google.golang.org/protobuf/cmd/protoc-gen-go google.golang.org/grpc/cmd/protoc-gen-go-grpc 
+# for go 1.16
+go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.25.0 
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 ```
 
 Now go to this project root directory and run following scripts for generating protobuf related code for the services:
-```
-generateinterestcalservice.sh
-generatemongodbhealthservice.sh
-generateusermgmtservice.sh 
+```shell
+sh ./generateinterestcalservice.sh
+sh ./generatemongodbhealthservice.sh
+sh ./generateusermgmtservice.sh 
 ```
 
 # Docker Compose Deployment
