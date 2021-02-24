@@ -20,3 +20,12 @@ services:
       - 27017:27017
     volumes:
       - ./mongo-compose-volume:/data/db
+
+  # This sidecar allows for the viewing of traces.
+  zipkin:
+    container_name: zipkin
+    networks:
+      - deposits_shared_grpc_network
+    image: openzipkin/zipkin:2.23
+    ports:
+      - 9411:9411

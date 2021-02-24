@@ -27,6 +27,7 @@
 - Docker compose deployment for development
 - Kubernetes Deployment with Ingress; Helm; Mongodb internal replication setup
 - Running from Editor/IDE directly included
+- Tracing enabled using Zipkin for Observability
 
 #### gRPC pre setup  (in case desired to generate already included protobuf code)
 This should not be needed when deploying; it is there for reference to how protobuf
@@ -68,7 +69,7 @@ docker run --env DEPOSITS_GRPC_SERVICE_ADDRESS=$DEPOSITS_GRPC_SERVICE_ADDRESS -v
 ### Start mongodb
 ```shell
 export COMPOSE_IGNORE_ORPHANS=True && \
-docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up 
+docker-compose -f ./deploy/compose/docker-compose.external-db-trace-only.yml up 
 ```
 
 ### Then set up mongodb indexes
@@ -105,6 +106,9 @@ export DEPOSITS_GRPC_SERVICE_TLS=true
 export DEPOSITS_GRPC_SERVICE_ADDRESS=localhost
 go run ./cmd/sanitytestclient
 ```
+
+### Server Tracing
+Access [zipkin](https://zipkin.io/) service at [http://localhost:9411/zipkin/](http://localhost:9411/zipkin/)
 
 ### Shutdown
 ```shell

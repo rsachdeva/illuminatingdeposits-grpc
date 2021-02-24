@@ -26,6 +26,24 @@ const (
 )
 
 func main() {
+
+	closer, err := RegisterTracer(
+		"illuminatingdeposits-grpc",
+		address,
+		"http://zipkin:9411/api/v2/spans",
+		1,
+	)
+	if err != nil {
+		log.Fatalf("could not regsiter tracer %v", err)
+	}
+	defer func() {
+		err := closer()
+		if err != nil {
+			log.Println("could not close reporter", err)
+		}
+	}()
+	log.Println("tracer registered...")
+
 	tls := readenv.TlsEnabled()
 	fmt.Println("tls is", tls)
 
@@ -42,7 +60,7 @@ func main() {
 
 	var opts []grpc.ServerOption
 	if tls {
-		opts = tlsOpts(opts)
+		opts = tlsOpts()
 	}
 	opts = append(opts, grpc.UnaryInterceptor(userauthn.EnsureValidToken))
 	s := grpc.NewServer(opts...)
@@ -60,6 +78,12 @@ func main() {
 	})
 	log.Println("Registering gRPC proto InterestCalService...")
 	interestcalpb.RegisterInterestCalServiceServer(s, interestcal.ServiceServer{})
+
+	// Trace struct {
+	// 	URL         string  `conf:"default:http://zipkin:9411/api/v2/spans"`
+	// 	Service     string  `conf:"default:illuminatingdeposits-rest"`
+	// 	Probability float64 `conf:"default:1"`
+	// }
 
 	serveWithShutdown(ctx, s, lis, mt)
 }

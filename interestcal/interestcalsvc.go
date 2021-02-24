@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
+	"go.opencensus.io/trace"
 )
 
 type ServiceServer struct {
@@ -12,6 +13,9 @@ type ServiceServer struct {
 }
 
 func (ServiceServer) CreateInterest(ctx context.Context, cireq *interestcalpb.CreateInterestRequest) (*interestcalpb.CreateInterestResponse, error) {
+	_, span := trace.StartSpan(ctx, "interestcal.svc.createinterest")
+	defer span.End()
+
 	resp, err := CalculateDelta(cireq)
 	if err != nil {
 		return nil, err

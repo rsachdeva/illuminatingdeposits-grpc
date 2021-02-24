@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -21,6 +22,8 @@ func EnsureValidToken(ctx context.Context, req interface{}, info *grpc.UnaryServ
 		log.Printf("Nothing needs to be authenticated for %v", info.FullMethod)
 		return handler(ctx, req)
 	}
+	ctx, span := trace.StartSpan(ctx, "userauthn.interceptor.ensurevalidtoken")
+	defer span.End()
 	log.Printf("Authentication is needed for %v", info.FullMethod)
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
