@@ -3,6 +3,7 @@
 package interestcal
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
+	"go.opencensus.io/trace"
 )
 
 const (
@@ -32,7 +34,7 @@ func timeTrack(start time.Time, name string) {
 
 // CalculateDelta calculations for all banks
 // by default withConcurrency is passed as true for more stuff to add
-func CalculateDelta(cireq *interestcalpb.CreateInterestRequest) (*interestcalpb.CreateInterestResponse, error) {
+func CalculateDelta(ctx context.Context, cireq *interestcalpb.CreateInterestRequest) (*interestcalpb.CreateInterestResponse, error) {
 	defer timeTrack(time.Now(), "CalculateDelta timed with withConcurrency for more I/O processing")
 	var bks []*interestcalpb.Bank
 	var delta float64
@@ -44,7 +46,7 @@ func CalculateDelta(cireq *interestcalpb.CreateInterestRequest) (*interestcalpb.
 	// if !withConcurrency {
 	// 	bks, delta, err = computeBanksDeltaSequentially(cireq)
 	// }
-	bks, delta, err = computeBanksDelta(cireq)
+	bks, delta, err = computeBanksDelta(ctx, cireq)
 	if err != nil {
 		return &interestcalpb.CreateInterestResponse{}, err
 	}
@@ -103,7 +105,7 @@ type BankResult struct {
 	err    error
 }
 
-func computeBanksDelta(cireq *interestcalpb.CreateInterestRequest) ([]*interestcalpb.Bank, float64, error) {
+func computeBanksDelta(ctx context.Context, cireq *interestcalpb.CreateInterestRequest) ([]*interestcalpb.Bank, float64, error) {
 	var bks []*interestcalpb.Bank
 	var delta float64
 	bkCh := make(chan BankResult)
@@ -126,7 +128,7 @@ func computeBanksDelta(cireq *interestcalpb.CreateInterestRequest) ([]*interestc
 	for i, nb := range cireq.NewBanks {
 		go func(i int, nb *interestcalpb.NewBank) {
 			defer waitGroup.Done()
-			computeBankDelta(nb, bkCh)
+			computeBankDelta(ctx, nb, bkCh)
 		}(i, nb)
 	}
 
@@ -151,7 +153,9 @@ func computeBanksDelta(cireq *interestcalpb.CreateInterestRequest) ([]*interestc
 }
 
 // return []*interestcalpb.Deposit, float64, error now in channel
-func computeBankDelta(nb *interestcalpb.NewBank, bkCh chan<- BankResult) {
+func computeBankDelta(ctx context.Context, nb *interestcalpb.NewBank, bkCh chan<- BankResult) {
+	_, span := trace.StartSpan(ctx, "interestcal.computeBankDelta")
+	defer span.End()
 	// time.Sleep(5 * time.Second) - for more upcoming I/O processing
 	var ds []*interestcalpb.Deposit
 	var bDelta float64

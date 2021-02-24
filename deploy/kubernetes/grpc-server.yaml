@@ -18,7 +18,7 @@ spec:
       containers:
         - name: grpcserversvc
           image: rsachdeva/illuminatingdeposits.grpc.server:v1.5.0
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Never
           ports:
             - containerPort: 50052
               name: grpc

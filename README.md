@@ -189,6 +189,9 @@ kubectl logs -l app.kubernetes.io/name=ingress-nginx -f
 ### Make docker images and Push Images to Docker Hub
 
 ```shell
+docker rmi rsachdeva/illuminatingdeposits.grpc.server:v1.5.0
+docker rmi rsachdeva/illuminatingdeposits.dbindexes:v1.5.0
+
 docker build -t rsachdeva/illuminatingdeposits.grpc.server:v1.5.0 -f ./build/Dockerfile.grpc.server .  
 docker build -t rsachdeva/illuminatingdeposits.dbindexes:v1.5.0 -f ./build/Dockerfile.dbindexes .  
 
@@ -236,9 +239,7 @@ kubectl create --dry-run=client secret tls illuminatingdeposits-grpc-secret-tls 
 ```
 Now lets depoly the grpc application related resources:
 ```shell
-# in case not built -- refer 'Make docker images and Push Images to Docker Hub'
-docker build -t rsachdeva/illuminatingdeposits.grpc.server:v1.5.0 -f ./build/Dockerfile.grpc.server .  
-docker build -t rsachdeva/illuminatingdeposits.dbindexes:v1.5.0 -f ./build/Dockerfile.dbindexes . 
+# in case docker image not built -- refer 'Make docker images and Push Images to Docker Hub' above
 kubectl apply -f deploy/kubernetes/.
 ```
 If status for ```kubectl get pod -l job-name=dbindexes | grep "Completed"```
@@ -266,7 +267,10 @@ With this Sanity test client, you will be able to:
 - JWT Authentication for Interest Delta Calculations for each deposit; each bank with all deposits and all banks
   Quickly confirms Sanity check for set up with Kubernetes/Docker.
   There are also separate Integration and Unit tests.
-  
+
+### Server Tracing
+Access [zipkin](https://zipkin.io/) service at [http://zipkin.127.0.0.1.nip.io](http://zipkin.127.0.0.1.nip.io)
+
 ### Detailed Kubernetes set up - Step by Step
 See 'Quick deploy for all Kubernetes resources' above. If any issues, you can follow detailed steps.
 TLS File set up and Ingress controller should have been installed using steps above.

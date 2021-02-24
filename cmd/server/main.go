@@ -26,6 +26,19 @@ const (
 )
 
 func main() {
+	tls := readenv.TlsEnabled()
+	fmt.Println("TLS is", tls)
+
+	log.SetFlags(log.LstdFlags | log.Ltime | log.Lshortfile)
+	log.Println("Starting ServiceServer...")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	mt := mongodbconn.Connect(ctx, 10)
+	mdb := mt.Database("depositsmongodb")
+	lis, err := net.Listen("tcp", address)
+	if err != nil {
+		log.Fatalf("could not listen %v", err)
+	}
 
 	closer, err := RegisterTracer(
 		"illuminatingdeposits-grpc",
@@ -42,21 +55,7 @@ func main() {
 			log.Println("could not close reporter", err)
 		}
 	}()
-	log.Println("tracer registered...")
-
-	tls := readenv.TlsEnabled()
-	fmt.Println("tls is", tls)
-
-	log.SetFlags(log.LstdFlags | log.Ltime | log.Lshortfile)
-	log.Println("Starting ServiceServer...")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	mt := mongodbconn.Connect(ctx, 10)
-	mdb := mt.Database("depositsmongodb")
-	lis, err := net.Listen("tcp", address)
-	if err != nil {
-		log.Fatalf("could not listen %v", err)
-	}
+	log.Println("Tracer registered...")
 
 	var opts []grpc.ServerOption
 	if tls {

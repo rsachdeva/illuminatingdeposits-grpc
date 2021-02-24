@@ -16,7 +16,7 @@ func (ServiceServer) CreateInterest(ctx context.Context, cireq *interestcalpb.Cr
 	_, span := trace.StartSpan(ctx, "interestcal.svc.createinterest")
 	defer span.End()
 
-	resp, err := CalculateDelta(cireq)
+	resp, err := CalculateDelta(ctx, cireq)
 	if err != nil {
 		return nil, err
 	}

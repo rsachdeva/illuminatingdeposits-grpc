@@ -1,6 +1,7 @@
 package interestcal_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -94,8 +95,7 @@ func TestCalculateDelta(t *testing.T) {
 			},
 		},
 	}
-
-	ciresp, err := interestcal.CalculateDelta(&cireq)
+	ciresp, err := interestcal.CalculateDelta(context.Background(), &cireq)
 	t.Logf("ciresp is %+v", ciresp)
 	require.Nil(t, err)
 	require.Equal(t, 4, len(ciresp.Banks), "overall number of banks must match")
