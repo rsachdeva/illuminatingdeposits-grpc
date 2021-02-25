@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"time"
 
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal"
@@ -40,10 +41,16 @@ func main() {
 		log.Fatalf("could not listen %v", err)
 	}
 
+	zurl := os.Getenv("DEPOSITS_TRACE_URL")
+	log.Println("zurl  empty ", zurl == "")
+	if zurl == "" {
+		zurl = "http://zipkin:9411/api/v2/spans"
+	}
+	log.Println("zipkin trace url is ", zurl)
 	closer, err := RegisterTracer(
 		"illuminatingdeposits-grpc",
 		address,
-		"http://zipkin:9411/api/v2/spans",
+		zurl,
 		1,
 	)
 	if err != nil {

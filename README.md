@@ -126,12 +126,13 @@ docker run --env DEPOSITS_GRPC_SERVICE_ADDRESS=$DEPOSITS_GRPC_SERVICE_ADDRESS -v
 ### Start DB:
 ```shell
 export COMPOSE_IGNORE_ORPHANS=True && \
-docker-compose -f ./deploy/compose/docker-compose.external-db-only.yml up
+docker-compose -f ./deploy/compose/docker-compose.external-db-trace-only.yml up
 ```
 And then run following (./tools/dbindexescli is actually needed only once):
 ```shell
 export DEPOSITS_GRPC_SERVICE_TLS=true
 export DEPOSITS_GRPC_DB_HOST=127.0.0.1
+export DEPOSITS_TRACE_URL=http://localhost:9411/api/v2/spans
 go run ./tools/dbindexescli
 go run ./cmd/server
 ```
@@ -146,6 +147,8 @@ export DEPOSITS_GRPC_SERVICE_TLS=true
 export DEPOSITS_GRPC_SERVICE_ADDRESS=localhost
 go run ./cmd/sanitytestclient
 ```
+### Server Tracing
+Access [zipkin](https://zipkin.io/) service at [http://localhost:9411/zipkin/](http://localhost:9411/zipkin/)
 
 # Kubernetes Deployment
 (for Better control; For Local Setup tested with Docker Desktop latest version with Kubernetes Enabled)
