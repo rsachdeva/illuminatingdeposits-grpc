@@ -21,6 +21,7 @@ require (
 	github.com/openzipkin/zipkin-go v0.2.5
 	github.com/ory/dockertest v3.3.5+incompatible
 	github.com/pkg/errors v0.9.1
+	github.com/segmentio/kafka-go v0.4.10
 	github.com/stretchr/testify v1.6.1
 	go.mongodb.org/mongo-driver v1.4.4
 	go.opencensus.io v0.23.0

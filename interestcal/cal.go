@@ -34,7 +34,7 @@ func timeTrack(start time.Time, name string) {
 
 // CalculateDelta calculations for all banks
 // by default withConcurrency is passed as true for more stuff to add
-func CalculateDelta(ctx context.Context, cireq *interestcalpb.CreateInterestRequest) (*interestcalpb.CreateInterestResponse, error) {
+func (svc ServiceServer) CalculateDelta(ctx context.Context, cireq *interestcalpb.CreateInterestRequest) (*interestcalpb.CreateInterestResponse, error) {
 	defer timeTrack(time.Now(), "CalculateDelta timed with withConcurrency for more I/O processing")
 	var bks []*interestcalpb.Bank
 	var delta float64
@@ -46,7 +46,7 @@ func CalculateDelta(ctx context.Context, cireq *interestcalpb.CreateInterestRequ
 	// if !withConcurrency {
 	// 	bks, delta, err = computeBanksDeltaSequentially(cireq)
 	// }
-	bks, delta, err = computeBanksDelta(ctx, cireq)
+	bks, delta, err = svc.computeBanksDelta(ctx, cireq)
 	if err != nil {
 		return &interestcalpb.CreateInterestResponse{}, err
 	}
@@ -105,7 +105,7 @@ type BankResult struct {
 	err    error
 }
 
-func computeBanksDelta(ctx context.Context, cireq *interestcalpb.CreateInterestRequest) ([]*interestcalpb.Bank, float64, error) {
+func (svc ServiceServer) computeBanksDelta(ctx context.Context, cireq *interestcalpb.CreateInterestRequest) ([]*interestcalpb.Bank, float64, error) {
 	var bks []*interestcalpb.Bank
 	var delta float64
 	bkCh := make(chan BankResult)
@@ -128,7 +128,7 @@ func computeBanksDelta(ctx context.Context, cireq *interestcalpb.CreateInterestR
 	for i, nb := range cireq.NewBanks {
 		go func(i int, nb *interestcalpb.NewBank) {
 			defer waitGroup.Done()
-			computeBankDelta(ctx, nb, bkCh)
+			svc.computeBankDelta(ctx, nb, bkCh)
 		}(i, nb)
 	}
 
@@ -153,7 +153,8 @@ func computeBanksDelta(ctx context.Context, cireq *interestcalpb.CreateInterestR
 }
 
 // return []*interestcalpb.Deposit, float64, error now in channel
-func computeBankDelta(ctx context.Context, nb *interestcalpb.NewBank, bkCh chan<- BankResult) {
+func (svc ServiceServer) computeBankDelta(ctx context.Context, nb *interestcalpb.NewBank, bkCh chan<- BankResult) {
+	log.Println("Kafka producer write enabled: ", !(svc.KafkaWriter == nil))
 	_, span := trace.StartSpan(ctx, "interestcal.computeBankDelta")
 	defer span.End()
 	// time.Sleep(5 * time.Second) - for more upcoming I/O processing
@@ -180,6 +181,16 @@ func computeBankDelta(ctx context.Context, nb *interestcalpb.NewBank, bkCh chan<
 				err:    err,
 			}
 		}
+		dc := DepositCalculation{
+			BankName:    nb.Name,
+			Account:     d.Account,
+			AccountType: d.AccountType,
+			Apy:         d.Apy,
+			Years:       d.Years,
+			Amount:      d.Amount,
+			Delta:       d.Delta,
+		}
+		svc.writeMessage(ctx, dc)
 		ds = append(ds, &d)
 		bDelta = bDelta + d.Delta
 	}

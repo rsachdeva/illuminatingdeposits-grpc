@@ -10,6 +10,7 @@ import (
 
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
+	"github.com/rsachdeva/illuminatingdeposits-grpc/kafkawriter"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth/mongodbhealthpb"
@@ -23,7 +24,9 @@ import (
 
 const (
 	// https://stackoverflow.com/questions/64093550/grpc-server-not-working-in-docker-compose
-	address = "0.0.0.0:50052"
+	address  = "0.0.0.0:50052"
+	topic    = "depositcalculation-grpc"
+	kafkaURL = "kafka:9092"
 )
 
 func main() {
@@ -82,8 +85,20 @@ func main() {
 	userauthnpb.RegisterUserAuthnServiceServer(s, userauthn.ServiceServer{
 		Mdb: mdb,
 	})
+	kafkawriter.CreateTopic(kafkaURL, topic)
+	kafkaWriter := kafkawriter.Configure(kafkaURL, topic)
+	log.Println("kafkaWriter is ", kafkaWriter)
+	defer func() {
+		err := kafkaWriter.Close()
+		if err != nil {
+			log.Fatalln("could not close depositcalculation connection", err)
+		}
+	}()
+	log.Println("Kafka writer registered...")
 	log.Println("Registering gRPC proto InterestCalService...")
-	interestcalpb.RegisterInterestCalServiceServer(s, interestcal.ServiceServer{})
+	interestcalpb.RegisterInterestCalServiceServer(s, interestcal.ServiceServer{
+		KafkaWriter: kafkaWriter,
+	})
 
 	// Trace struct {
 	// 	URL         string  `conf:"default:http://zipkin:9411/api/v2/spans"`

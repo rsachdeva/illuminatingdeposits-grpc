@@ -66,10 +66,16 @@ docker build -t tlscert:v0.1 -f ./build/Dockerfile.openssl ./conf/tls && \
 docker run --env DEPOSITS_GRPC_SERVICE_ADDRESS=$DEPOSITS_GRPC_SERVICE_ADDRESS -v $PWD/conf/tls:/tls tlscert:v0.1
 ```
 
-### Start mongodb
+### Start mongodb and tracing service
 ```shell
 export COMPOSE_IGNORE_ORPHANS=True && \
-docker-compose -f ./deploy/compose/docker-compose.external-db-trace-only.yml up 
+docker-compose -f ./deploy/compose/docker-compose.external-db-trace-only.yml up
+```
+
+### Start streaming service
+```shell
+export COMPOSE_IGNORE_ORPHANS=True && \
+docker-compose -f ./deploy/compose/docker-compose.kafka.yml up
 ```
 
 ### Then set up mongodb indexes
@@ -398,4 +404,4 @@ transport: Error while dialing dial tcp
 ```
 
 # Version
-v1.5.0
+v1.5.10
