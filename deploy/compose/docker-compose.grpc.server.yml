@@ -21,3 +21,4 @@ services:
     environment:
       - DEPOSITS_GRPC_DB_HOST=depositsmongodb
       - DEPOSITS_GRPC_SERVICE_TLS=true
+      - DEPOSITS_GRPC_SERVICE_MESSAGE_BROKER_LOG=true

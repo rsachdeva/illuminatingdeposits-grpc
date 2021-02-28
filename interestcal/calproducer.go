@@ -20,10 +20,6 @@ type DepositCalculation struct {
 }
 
 func (svc ServiceServer) writeMessage(ctx context.Context, dc DepositCalculation) {
-	if svc.KafkaWriter == nil {
-		log.Println("not enabling kafka producer write messages")
-		return
-	}
 	recordJSON, _ := json.Marshal(dc)
 	log.Println("svc.AccessToken is ", svc.AccessToken)
 	msg := kafka.Message{

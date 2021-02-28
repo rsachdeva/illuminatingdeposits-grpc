@@ -154,7 +154,6 @@ func (svc ServiceServer) computeBanksDelta(ctx context.Context, cireq *interestc
 
 // return []*interestcalpb.Deposit, float64, error now in channel
 func (svc ServiceServer) computeBankDelta(ctx context.Context, nb *interestcalpb.NewBank, bkCh chan<- BankResult) {
-	log.Println("Kafka producer write enabled: ", !(svc.KafkaWriter == nil))
 	_, span := trace.StartSpan(ctx, "interestcal.computeBankDelta")
 	defer span.End()
 	// time.Sleep(5 * time.Second) - for more upcoming I/O processing
@@ -190,7 +189,10 @@ func (svc ServiceServer) computeBankDelta(ctx context.Context, nb *interestcalpb
 			Amount:      d.Amount,
 			Delta:       d.Delta,
 		}
-		svc.writeMessage(ctx, dc)
+		if svc.KafkaWriter != nil {
+			log.Println("writing message to message broker..")
+			svc.writeMessage(ctx, dc)
+		}
 		ds = append(ds, &d)
 		bDelta = bDelta + d.Delta
 	}

@@ -19,6 +19,7 @@ import (
 	"github.com/rsachdeva/illuminatingdeposits-grpc/userauthn/userauthnpb"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
+	"github.com/segmentio/kafka-go"
 	"google.golang.org/grpc"
 )
 
@@ -85,16 +86,19 @@ func main() {
 	userauthnpb.RegisterUserAuthnServiceServer(s, userauthn.ServiceServer{
 		Mdb: mdb,
 	})
-	kafkawriter.CreateTopic(kafkaURL, topic)
-	kafkaWriter := kafkawriter.Configure(kafkaURL, topic)
-	log.Println("kafkaWriter is ", kafkaWriter)
-	defer func() {
-		err := kafkaWriter.Close()
-		if err != nil {
-			log.Fatalln("could not close depositcalculation connection", err)
-		}
-	}()
-	log.Println("Kafka writer registered...")
+	var kafkaWriter *kafka.Writer
+	if readenv.MessageBrokerLogEnabled() {
+		kafkawriter.CreateTopic(kafkaURL, topic)
+		kafkaWriter = kafkawriter.Configure(kafkaURL, topic)
+		log.Println("kafkaWriter is ", kafkaWriter)
+		defer func() {
+			err := kafkaWriter.Close()
+			if err != nil {
+				log.Fatalln("could not close depositcalculation connection", err)
+			}
+		}()
+		log.Println("Kafka writer registered...")
+	}
 	log.Println("Registering gRPC proto InterestCalService...")
 	interestcalpb.RegisterInterestCalServiceServer(s, interestcal.ServiceServer{
 		KafkaWriter: kafkaWriter,

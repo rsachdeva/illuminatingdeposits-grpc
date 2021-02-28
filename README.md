@@ -21,12 +21,13 @@
      - each deposit 
      - each bank with all deposits
      - all banks!
-- Concurrency support for computing Banks Delta included for more I/O processing
+- Concurrency support for computing Banks Delta included for I/O processing
 - Sanity test client included for settings for each deployment
 - Dockering and using it for both Docker Compose and Kubernetes
 - Docker compose deployment for development
 - Kubernetes Deployment with Ingress; Helm; Mongodb internal replication setup
 - Running from Editor/IDE directly included
+- Log Based Message Broker using Kafka for Each Interest Calculation Event (in progress; currently enabled with Docker compose deployment)  
 - Tracing enabled using Zipkin for Observability
 
 #### gRPC pre setup  (in case desired to generate already included protobuf code)
@@ -72,7 +73,7 @@ export COMPOSE_IGNORE_ORPHANS=True && \
 docker-compose -f ./deploy/compose/docker-compose.external-db-trace-only.yml up
 ```
 
-### Start streaming service
+### Start message broker log streaming service
 ```shell
 export COMPOSE_IGNORE_ORPHANS=True && \
 docker-compose -f ./deploy/compose/docker-compose.kafka.yml up
@@ -404,4 +405,4 @@ transport: Error while dialing dial tcp
 ```
 
 # Version
-v1.5.10
+v1.5.20

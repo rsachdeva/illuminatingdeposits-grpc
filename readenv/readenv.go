@@ -1,23 +1,30 @@
 package readenv
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strconv"
 )
 
 func TlsEnabled() bool {
-	var enabled bool
-	var err error
-	// change DEPOSITS_GRPC_SERVICE_TLS env variable in command line or editor
-	enabled = true
-	if tlsAllowed, ok := os.LookupEnv("DEPOSITS_GRPC_SERVICE_TLS"); ok {
-		fmt.Println("tlsAllowed from env is", tlsAllowed)
-		enabled, err = strconv.ParseBool(tlsAllowed)
-		if err != nil {
-			log.Fatal("tls DEPOSITS_GRPC_SERVICE_TLS reading env error")
-		}
-	}
+	enabled := envEnabled("DEPOSITS_GRPC_SERVICE_TLS", true)
+	log.Println("TlsEnabled from env is ", enabled)
 	return enabled
+}
+
+func MessageBrokerLogEnabled() bool {
+	enabled := envEnabled("DEPOSITS_GRPC_SERVICE_MESSAGE_BROKER_LOG", false)
+	log.Println("MessageBrokerLogEnabled from env is ", enabled)
+	return enabled
+}
+
+func envEnabled(name string, defaultValue bool) bool {
+	if envValue, ok := os.LookupEnv(name); ok {
+		enabled, err := strconv.ParseBool(envValue)
+		if err != nil {
+			log.Fatalf("name %v env error", name)
+		}
+		return enabled
+	}
+	return defaultValue
 }

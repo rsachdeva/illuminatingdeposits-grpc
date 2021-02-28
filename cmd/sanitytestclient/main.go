@@ -168,7 +168,7 @@ func requestCreateInterest(connWithToken *grpc.ClientConn) {
 						AccountType: "CD",
 						Apy:         1.01,
 						Years:       10,
-						Amount:      27000,
+						Amount:      27001,
 					},
 				},
 			},
