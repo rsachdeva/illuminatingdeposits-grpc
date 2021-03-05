@@ -25,9 +25,8 @@ import (
 
 const (
 	// https://stackoverflow.com/questions/64093550/grpc-server-not-working-in-docker-compose
-	address  = "0.0.0.0:50052"
-	topic    = "depositcalculation-grpc"
-	kafkaURL = "kafka:9092"
+	address = "0.0.0.0:50052"
+	topic   = "depositcalculation-grpc"
 )
 
 func main() {
@@ -88,6 +87,11 @@ func main() {
 	})
 	var kafkaWriter *kafka.Writer
 	if readenv.MessageBrokerLogEnabled() {
+		kafkaURL := "kafka:9092"
+		if khost, ok := os.LookupEnv("DEPOSITS_GRPC_KAFKA_HOST"); ok {
+			kafkaURL = fmt.Sprintf("%v:9092", khost)
+		}
+		log.Println("kafkaURL is ", kafkaURL)
 		kafkawriter.CreateTopic(kafkaURL, topic)
 		kafkaWriter = kafkawriter.Configure(kafkaURL, topic)
 		log.Println("kafkaWriter is ", kafkaWriter)

@@ -18,7 +18,7 @@ spec:
       containers:
         - name: grpcserversvc
           image: rsachdeva/illuminatingdeposits.grpc.server:v1.5.0
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 50052
               name: grpc
@@ -28,7 +28,11 @@ spec:
             - name: DEPOSITS_WEB_ADDRESS
               value: "0.0.0.0:50052"
             - name: DEPOSITS_GRPC_DB_HOST
-              value: mongo
+              value: "mongo"
+            - name: DEPOSITS_GRPC_SERVICE_MESSAGE_BROKER_LOG
+              value: "true"
+            - name: DEPOSITS_GRPC_KAFKA_HOST
+              value: "kafka-grpc"
 #            - name: GODEBUG
 #              value: http2debug=2
 ---
@@ -42,6 +46,7 @@ spec:
   type: ClusterIP
   ports:
     - name: grpc
+      # A Service can map any incoming port to a targetPort. By default and for convenience, the targetPort is set to the same value as the port field.
       port: 50052
       protocol: TCP
       # for container

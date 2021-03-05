@@ -10,7 +10,7 @@
 # Features include:
 - Golang (Go) gRPC Service Methods with protobuf for Messages
 - TLS for all requests
-- Integration and Unit tests; run in parallel using dockertest for faster feedback
+- Integration and Unit tests; run in parallel using dockertest for faster feedback (more in progress)
 - Coverage Result for key packages
 - MongoDB health check service
 - User Management service with MongoDB for user creation
@@ -27,7 +27,7 @@
 - Docker compose deployment for development
 - Kubernetes Deployment with Ingress; Helm; Mongodb internal replication setup
 - Running from Editor/IDE directly included
-- Log Based Message Broker using Kafka for Each Interest Calculation Event (in progress; currently enabled with Docker compose deployment)  
+- Log Based Message Broker using Kafka for Each Interest Calculation Event with Docker Compose and Kubernetes 
 - Tracing enabled using Zipkin for Observability
 
 #### gRPC pre setup  (in case desired to generate already included protobuf code)
@@ -196,6 +196,24 @@ To see logs for nginx ingress controller:
 kubectl logs -l app.kubernetes.io/name=ingress-nginx -f
 ```
 
+### Installing Kafka
+Using helm to install kafka
+```shell
+brew install helm
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+helm repo list
+```
+and then use
+```shell
+helm install kafka -f ./deploy/kubernetes/kafka/helm-values.yaml bitnami/kafka
+```
+to install ingress controller
+To see logs for kafka:
+```shell
+kubectl logs pod/kafka-0 -f
+```
+
 ### Make docker images and Push Images to Docker Hub
 
 ```shell
@@ -210,11 +228,9 @@ docker push rsachdeva/illuminatingdeposits.dbindexes:v1.5.0
 ```
 The v1.5.0 should match to version being used in Kubernetes resources (grpc-server.yaml; dbindexes.yaml).
 
-### Quick deploy for all Kubernetes resources ( more Detailed Kubernetes set up - Step by Step is below)
-TLS File set up should have been installed using steps above.
-```shell
-helm install ingress-nginx -f ./deploy/kubernetes/nginx-ingress-controller/helm-values.yaml ingress-nginx/ingress-nginx
-```
+### Quick deploy for all Kubernetes resources ( more Detailed Kubernetes set up - Step by Step is below; Above kubernetes steps are common)
+TLS File set up should have been installed using steps above along with installing using help ingress-nmginx and kafka
+
 MongoDB set up with internal replication has to be done once unless persistent volumes are deleted or
 number of replicas are changed:
 ```shell
@@ -245,6 +261,7 @@ Allows connecting MongoDB UI using NodePort at 30010 from outside cluster locall
 We only need to set secrets once after tls files have been generated; This is using dry run:
 ```shell
 kubectl delete secret illuminatingdeposits-grpc-secret-tls
+# only so secret can be applied with all resources as once; easier to delete with all resources
 kubectl create --dry-run=client secret tls illuminatingdeposits-grpc-secret-tls --key conf/tls/serverkeyto.pem --cert conf/tls/servercrtto.pem -o yaml > ./deploy/kubernetes/tls-secret-ingress.yaml
 ```
 Now lets depoly the grpc application related resources:
@@ -319,7 +336,9 @@ kubectl apply -f deploy/kubernetes/tls-secret-ingress.yaml
 kubectl apply -f deploy/kubernetes/grpc-server.yaml
 ```
 And see logs using
-```kubectl logs -l app=grpcserversvc -f```
+```shell
+kubectl logs -l app=grpcserversvc -f
+```
   
 ### Remove all resources / Shutdown
 
@@ -327,6 +346,7 @@ And see logs using
 kubectl delete -f ./deploy/kubernetes/.
 kubectl delete -f ./deploy/kubernetes/mongodb/.
 helm uninstall ingress-nginx
+helm uninstall kafka
 ```
 This does not remove prestient volume.
 In case you are sure, you don't want to keep data only then
@@ -405,4 +425,4 @@ transport: Error while dialing dial tcp
 ```
 
 # Version
-v1.5.20
+v1.5.30

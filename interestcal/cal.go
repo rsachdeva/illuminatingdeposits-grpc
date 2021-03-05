@@ -154,9 +154,9 @@ func (svc ServiceServer) computeBanksDelta(ctx context.Context, cireq *interestc
 
 // return []*interestcalpb.Deposit, float64, error now in channel
 func (svc ServiceServer) computeBankDelta(ctx context.Context, nb *interestcalpb.NewBank, bkCh chan<- BankResult) {
+	//  I/O processing kafka broker and tracing (instead of time.Sleep(5 * time.Second) )
 	_, span := trace.StartSpan(ctx, "interestcal.computeBankDelta")
 	defer span.End()
-	// time.Sleep(5 * time.Second) - for more upcoming I/O processing
 	var ds []*interestcalpb.Deposit
 	var bDelta float64
 	for _, nd := range nb.NewDeposits {
