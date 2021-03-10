@@ -211,7 +211,7 @@ helm install kafka -f ./deploy/kubernetes/kafka/helm-values.yaml bitnami/kafka
 to install ingress controller
 To see logs for kafka:
 ```shell
-kubectl logs pod/kafka-0 -f
+kubectl logs pod/kafka-grpc-0 -f
 ```
 
 ### Make docker images and Push Images to Docker Hub
@@ -383,6 +383,10 @@ The -count=1 is mainly to not use caching and can be added as follows if needed 
 any go test command:
 ```shell 
 go test -v -count=1 ./...
+```
+For running single test for debugging purpose:
+```shell
+go test -v -count=1 ./mongodbhealth -run TestServiceServer_HealthOk
 ```
 See Editor specifcs to see Covered Parts in the Editor.
 #### Test Docker containers for Mongodb

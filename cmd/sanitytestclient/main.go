@@ -222,6 +222,20 @@ func requestCreateInterest(connWithToken *grpc.ClientConn) {
 					},
 				},
 			},
+			// 2021/03/10 14:59:05 error calling CreateInterest service rpc error: code = InvalidArgument desc =
+			// Interest cal invalid error: calculation for Account: 28282: NewDeposit period in years 0.0001 should not be less than 30 days
+			// {
+			// 	Name: "ERROR",
+			// 	NewDeposits: []*interestcalpb.NewDeposit{
+			// 		{
+			// 			Account:     "28282",
+			// 			AccountType: "CD",
+			// 			Apy:         5,
+			// 			Years:       0.0001,
+			// 			Amount:      1000000,
+			// 		},
+			// 	},
+			// },
 		},
 	}
 	// endpoint CreateInterest method in InterestCalculationService

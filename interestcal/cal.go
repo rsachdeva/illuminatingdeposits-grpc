@@ -33,7 +33,7 @@ func timeTrack(start time.Time, name string) {
 }
 
 // CalculateDelta calculations for all banks
-// by default withConcurrency is passed as true for more stuff to add
+// computeBanksDelta uses concurrency
 func (svc ServiceServer) CalculateDelta(ctx context.Context, cireq *interestcalpb.CreateInterestRequest) (*interestcalpb.CreateInterestResponse, error) {
 	defer timeTrack(time.Now(), "CalculateDelta timed with withConcurrency for more I/O processing")
 	var bks []*interestcalpb.Bank
@@ -173,12 +173,14 @@ func (svc ServiceServer) computeBankDelta(ctx context.Context, nb *interestcalpb
 		// }
 		// Sending err result
 		if err != nil {
+			fmt.Printf("error in goroutine running computeDepositDelta %v\n", err)
 			bkCh <- BankResult{
 				name:   "",
 				ds:     nil,
 				bDelta: 0,
 				err:    err,
 			}
+			return
 		}
 		dc := DepositCalculation{
 			BankName:    nb.Name,

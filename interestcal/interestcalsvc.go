@@ -3,13 +3,16 @@ package interestcal
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
 	"github.com/segmentio/kafka-go"
 	"go.opencensus.io/trace"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 type ServiceServer struct {
@@ -34,7 +37,7 @@ func (svc ServiceServer) CreateInterest(ctx context.Context, cireq *interestcalp
 
 	resp, err := svc.CalculateDelta(ctx, cireq)
 	if err != nil {
-		return nil, err
+		return nil, status.Errorf(codes.InvalidArgument, fmt.Sprintf("Interest cal invalid error: %v", err))
 	}
 	return resp, nil
 }
