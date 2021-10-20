@@ -214,6 +214,36 @@ To see logs for kafka:
 kubectl logs pod/kafka-grpc-0 -f
 ```
 
+This installation message also allows to test installation of kafka quickly:
+(kafka-console-producer.sh and kafka-console-consumer.sh can be run inside the kafka-grpc-client pod created below)
+```shell
+Kafka can be accessed by consumers via port 9092 on the following DNS name from within your cluster:
+
+    kafka-grpc.default.svc.cluster.local
+
+Each Kafka broker can be accessed by producers via port 9092 on the following DNS name(s) from within your cluster:
+
+    kafka-grpc-0.kafka-grpc-headless.default.svc.cluster.local:9092
+
+To create a pod that you can use as a Kafka client run the following commands:
+
+    kubectl run kafka-grpc-client --restart='Never' --image docker.io/bitnami/kafka:2.8.1-debian-10-r0 --namespace default --command -- sleep infinity
+    kubectl exec --tty -i kafka-grpc-client --namespace default -- bash
+
+    PRODUCER:
+        kafka-console-producer.sh \
+
+            --broker-list kafka-grpc-0.kafka-grpc-headless.default.svc.cluster.local:9092 \
+            --topic test
+
+    CONSUMER:
+        kafka-console-consumer.sh \
+
+            --bootstrap-server kafka-grpc.default.svc.cluster.local:9092 \
+            --topic test \
+            --from-beginning
+```
+
 ### Make docker images and Push Images to Docker Hub
 
 ```shell
@@ -229,7 +259,7 @@ docker push rsachdeva/illuminatingdeposits.dbindexes:v1.5.0
 The v1.5.0 should match to version being used in Kubernetes resources (grpc-server.yaml; dbindexes.yaml).
 
 ### Quick deploy for all Kubernetes resources ( more Detailed Kubernetes set up - Step by Step is below; Above kubernetes steps are common)
-TLS File set up should have been installed using steps above along with installing using help ingress-nmginx and kafka
+TLS File set up should have been installed using steps above along with installing using help ingress-nginx and kafka
 
 MongoDB set up with internal replication has to be done once unless persistent volumes are deleted or
 number of replicas are changed:
@@ -260,8 +290,8 @@ rs.status()
 Allows connecting MongoDB UI using NodePort at 30010 from outside cluster locally to view data.
 We only need to set secrets once after tls files have been generated; This is using dry run:
 ```shell
-kubectl delete secret illuminatingdeposits-grpc-secret-tls
 # only so secret can be applied with all resources as once; easier to delete with all resources
+kubectl delete secret illuminatingdeposits-grpc-secret-tls
 kubectl create --dry-run=client secret tls illuminatingdeposits-grpc-secret-tls --key conf/tls/serverkeyto.pem --cert conf/tls/servercrtto.pem -o yaml > ./deploy/kubernetes/tls-secret-ingress.yaml
 ```
 Now lets depoly the grpc application related resources:
