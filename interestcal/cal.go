@@ -46,6 +46,7 @@ func (svc ServiceServer) CalculateDelta(ctx context.Context, cireq *interestcalp
 	// if !withConcurrency {
 	// 	bks, delta, err = computeBanksDeltaSequentially(cireq)
 	// }
+	log.Println("Starting overall calculate delta")
 	bks, delta, err = svc.computeBanksDelta(ctx, cireq)
 	if err != nil {
 		return &interestcalpb.CreateInterestResponse{}, err
@@ -123,7 +124,7 @@ func (svc ServiceServer) computeBanksDelta(ctx context.Context, cireq *interestc
 	// }()
 
 	// for each bank calculation with all deposists 1 goroutine
-	// fmt.Println("len(cireq.NewBanks) is", len(cireq.NewBanks))
+	log.Println("len(cireq.NewBanks) is", len(cireq.NewBanks))
 	waitGroup.Add(len(cireq.NewBanks))
 	for i, nb := range cireq.NewBanks {
 		go func(i int, nb *interestcalpb.NewBank) {
@@ -146,6 +147,7 @@ func (svc ServiceServer) computeBanksDelta(ctx context.Context, cireq *interestc
 			Deposits: bkRes.ds,
 			Delta:    roundToNearest(bkRes.bDelta),
 		}
+		log.Println("bk bank being added with delta calculation is", bk)
 		bks = append(bks, &bk)
 		delta = delta + bk.Delta
 	}
@@ -160,6 +162,7 @@ func (svc ServiceServer) computeBankDelta(ctx context.Context, nb *interestcalpb
 	var ds []*interestcalpb.Deposit
 	var bDelta float64
 	for _, nd := range nb.NewDeposits {
+		log.Printf("for nb.name %v the nd is %v", nb.Name, nd)
 		d := interestcalpb.Deposit{
 			Account:     nd.Account,
 			AccountType: nd.AccountType,
@@ -172,6 +175,7 @@ func (svc ServiceServer) computeBankDelta(ctx context.Context, nb *interestcalpb
 		// 	return nil, 0, err
 		// }
 		// Sending err result
+		fmt.Println("any err in compute deposit delta", err)
 		if err != nil {
 			fmt.Printf("error in goroutine running computeDepositDelta %v\n", err)
 			bkCh <- BankResult{
@@ -197,7 +201,11 @@ func (svc ServiceServer) computeBankDelta(ctx context.Context, nb *interestcalpb
 		}
 		ds = append(ds, &d)
 		bDelta = bDelta + d.Delta
+		fmt.Println("inside loop ds is", ds)
+		fmt.Println("inside loop bDelta is", bDelta)
 	}
+	fmt.Println("outside loop ds is", ds)
+	fmt.Println("outside loop bDelta is", bDelta)
 	// return ds, bDelta, nil
 	bkRes := BankResult{
 		name:   nb.Name,
@@ -212,14 +220,18 @@ func (svc ServiceServer) computeBankDelta(ctx context.Context, nb *interestcalpb
 func computeDepositDelta(d *interestcalpb.Deposit) error {
 	e := earned(d)
 	e30Days, err := earned30days(e, d.Years)
+	fmt.Println("err in computeDepositDelta is", err)
 	if err != nil {
+		fmt.Println("error in computeDepositDelta ", err)
 		return errors.Wrapf(err, "calculation for Account: %s", d.Account)
 	}
 	d.Delta = roundToNearest(e30Days)
+	log.Println("no error returned computeDepositDelta d.Delta is", d.Delta)
 	return nil
 }
 
 func earned(d *interestcalpb.Deposit) float64 {
+	fmt.Println("d.AccountType is", d.AccountType)
 	switch d.AccountType {
 	case Sa, CD:
 		return compoundInterest(d.Apy, d.Years, d.Amount)

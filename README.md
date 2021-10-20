@@ -310,7 +310,7 @@ And see logs using
 ### Sanity test Client - gRPC Services Endpoints Invoked Externally:
 The server side DEPOSITS_GRPC_SERVICE_TLS should be consistent and set for client also.
 Uncomment any request function if not desired.
-
+As stated before, All commands should be executed from the root directory (illuminatingdeposits-grpc) of the project
 ```shell
 export GODEBUG=x509ignoreCN=0
 export DEPOSITS_GRPC_SERVICE_TLS=true

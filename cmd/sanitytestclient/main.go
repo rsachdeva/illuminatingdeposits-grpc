@@ -8,8 +8,10 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/google/uuid"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/interestcal/interestcalpb"
@@ -116,128 +118,140 @@ func requestCreateInterest(connWithToken *grpc.ClientConn) {
 	iCalSvcClient := interestcalpb.NewInterestCalServiceClient(connWithToken)
 	fmt.Println("iCalSvcClient client created")
 
-	req := interestcalpb.CreateInterestRequest{
-		// &interestcalpb.NewBank is reduntant type
-		// []*interestcalpb.NewBank{&interestcalpb.NewBank{ changed to []*interestcalpb.NewBank{{
-		NewBanks: []*interestcalpb.NewBank{
-			{
-				Name: "HAPPIEST",
-				NewDeposits: []*interestcalpb.NewDeposit{
-					{
-						Account:     "1234",
-						AccountType: "Checking",
-						Apy:         0,
-						Years:       1,
-						Amount:      100,
-					},
-					{
-						Account:     "1256",
-						AccountType: "CD",
-						Apy:         24,
-						Years:       2,
-						Amount:      10700,
-					},
-					{
-						Account:     "1111",
-						AccountType: "CD",
-						Apy:         1.01,
-						Years:       10,
-						Amount:      27000,
-					},
-				},
-			},
-			{
-				Name: "CLONED",
-				NewDeposits: []*interestcalpb.NewDeposit{
-					{
-						Account:     "1234",
-						AccountType: "Checking",
-						Apy:         0,
-						Years:       1,
-						Amount:      100,
-					},
-					{
-						Account:     "1256",
-						AccountType: "CD",
-						Apy:         24,
-						Years:       2,
-						Amount:      10700,
-					},
-					{
-						Account:     "1111",
-						AccountType: "CD",
-						Apy:         1.01,
-						Years:       10,
-						Amount:      27001,
-					},
-				},
-			},
-			{
-				Name: "CALM",
-				NewDeposits: []*interestcalpb.NewDeposit{
-					{
-						Account:     "2662",
-						AccountType: "Brokered CD",
-						Apy:         6,
-						Years:       7,
-						Amount:      12662,
-					},
-					{
-						Account:     "2552",
-						AccountType: "CD",
-						Apy:         2.22,
-						Years:       8,
-						Amount:      12552,
-					},
-				},
-			},
-			{
-				Name: "NICE",
-				NewDeposits: []*interestcalpb.NewDeposit{
-					{
-						Account:     "1234",
-						AccountType: "Brokered CD",
-						Apy:         2.4,
-						Years:       7,
-						Amount:      10990,
-					},
-				},
-			},
-			{
-				Name: "ANGRY",
-				NewDeposits: []*interestcalpb.NewDeposit{
-					{
-						Account:     "1234",
-						AccountType: "Brokered CD",
-						Apy:         5,
-						Years:       7,
-						Amount:      10990,
-					},
-					{
-						Account:     "9898",
-						AccountType: "CD",
-						Apy:         2.22,
-						Years:       1,
-						Amount:      5500,
-					},
-				},
-			},
-			// 2021/03/10 14:59:05 error calling CreateInterest service rpc error: code = InvalidArgument desc =
-			// Interest cal invalid error: calculation for Account: 28282: NewDeposit period in years 0.0001 should not be less than 30 days
-			// {
-			// 	Name: "ERROR",
-			// 	NewDeposits: []*interestcalpb.NewDeposit{
-			// 		{
-			// 			Account:     "28282",
-			// 			AccountType: "CD",
-			// 			Apy:         5,
-			// 			Years:       0.0001,
-			// 			Amount:      1000000,
-			// 		},
-			// 	},
-			// },
-		},
+	jsonBytes, err := os.ReadFile("cmd/sanitytestclient/data/sampleinvest.json")
+	if err != nil {
+		log.Println("could not read file", err)
 	}
+	log.Println("jsonDeposits is", string(jsonBytes))
+	var req interestcalpb.CreateInterestRequest
+	err = json.Unmarshal(jsonBytes, &req)
+	if err != nil {
+		fmt.Println("err in unmarshall", err)
+		log.Println("could not Unmarshal json", err)
+	}
+	fmt.Printf("interestcalpb.NewBank nb is %v and type is %T", req, req)
+	// req := interestcalpb.CreateInterestRequest{
+	// 	// &interestcalpb.NewBank is reduntant type
+	// 	// []*interestcalpb.NewBank{&interestcalpb.NewBank{ changed to []*interestcalpb.NewBank{{
+	// 	NewBanks: []*interestcalpb.NewBank{
+	// 		{
+	// 			Name: "HAPPIEST",
+	// 			NewDeposits: []*interestcalpb.NewDeposit{
+	// 				{
+	// 					Account:     "1234",
+	// 					AccountType: "Checking",
+	// 					Apy:         0,
+	// 					Years:       1,
+	// 					Amount:      100,
+	// 				},
+	// 				{
+	// 					Account:     "1256",
+	// 					AccountType: "CD",
+	// 					Apy:         24,
+	// 					Years:       2,
+	// 					Amount:      10700,
+	// 				},
+	// 				{
+	// 					Account:     "1111",
+	// 					AccountType: "CD",
+	// 					Apy:         1.01,
+	// 					Years:       10,
+	// 					Amount:      27000,
+	// 				},
+	// 			},
+	// 		},
+	// 		{
+	// 			Name: "CLONED",
+	// 			NewDeposits: []*interestcalpb.NewDeposit{
+	// 				{
+	// 					Account:     "1234",
+	// 					AccountType: "Checking",
+	// 					Apy:         0,
+	// 					Years:       1,
+	// 					Amount:      100,
+	// 				},
+	// 				{
+	// 					Account:     "1256",
+	// 					AccountType: "CD",
+	// 					Apy:         24,
+	// 					Years:       2,
+	// 					Amount:      10700,
+	// 				},
+	// 				{
+	// 					Account:     "1111",
+	// 					AccountType: "CD",
+	// 					Apy:         1.01,
+	// 					Years:       10,
+	// 					Amount:      27001,
+	// 				},
+	// 			},
+	// 		},
+	// 		{
+	// 			Name: "CALM",
+	// 			NewDeposits: []*interestcalpb.NewDeposit{
+	// 				{
+	// 					Account:     "2662",
+	// 					AccountType: "Brokered CD",
+	// 					Apy:         6,
+	// 					Years:       7,
+	// 					Amount:      12662,
+	// 				},
+	// 				{
+	// 					Account:     "2552",
+	// 					AccountType: "CD",
+	// 					Apy:         2.22,
+	// 					Years:       8,
+	// 					Amount:      12552,
+	// 				},
+	// 			},
+	// 		},
+	// 		{
+	// 			Name: "NICE",
+	// 			NewDeposits: []*interestcalpb.NewDeposit{
+	// 				{
+	// 					Account:     "1234",
+	// 					AccountType: "Brokered CD",
+	// 					Apy:         2.4,
+	// 					Years:       7,
+	// 					Amount:      10990,
+	// 				},
+	// 			},
+	// 		},
+	// 		{
+	// 			Name: "ANGRY",
+	// 			NewDeposits: []*interestcalpb.NewDeposit{
+	// 				{
+	// 					Account:     "1234",
+	// 					AccountType: "Brokered CD",
+	// 					Apy:         5,
+	// 					Years:       7,
+	// 					Amount:      10990,
+	// 				},
+	// 				{
+	// 					Account:     "9898",
+	// 					AccountType: "CD",
+	// 					Apy:         2.22,
+	// 					Years:       1,
+	// 					Amount:      5500,
+	// 				},
+	// 			},
+	// 		},
+	// 		// 2021/03/10 14:59:05 error calling CreateInterest service rpc error: code = InvalidArgument desc =
+	// 		// Interest cal invalid error: calculation for Account: 28282: NewDeposit period in years 0.0001 should not be less than 30 days
+	// 		// {
+	// 		// 	Name: "ERROR",
+	// 		// 	NewDeposits: []*interestcalpb.NewDeposit{
+	// 		// 		{
+	// 		// 			Account:     "28282",
+	// 		// 			AccountType: "CD",
+	// 		// 			Apy:         5,
+	// 		// 			Years:       0.0001,
+	// 		// 			Amount:      1000000,
+	// 		// 		},
+	// 		// 	},
+	// 		// },
+	// 	},
+	// }
 	// endpoint CreateInterest method in InterestCalculationService
 	ciresp, err := iCalSvcClient.CreateInterest(context.Background(), &req)
 	if err != nil {
