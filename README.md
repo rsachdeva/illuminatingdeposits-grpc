@@ -22,7 +22,15 @@
      - each bank with all deposits
      - all banks!
 - Concurrency support for computing Banks Delta included for I/O processing
-- Sanity test client included for settings for each deployment
+- Sanity test client included each deployment settings
+  With this Sanity test client, you will be able to:
+  - get status of Mongo DB
+  - add a new user
+  - edit json file that is read to make input request to gRPC service
+  - JWT generation for Authentication
+  - JWT Authentication for Interest Delta Calculations for each deposit; each bank with all deposits and all banks
+    Quickly confirms Sanity check for set up with Kubernetes/Docker.
+    There are also separate Integration and Unit tests.
 - Dockering and using it for both Docker Compose and Kubernetes
 - Docker compose deployment for development
 - Kubernetes Deployment with Ingress; Helm; Mongodb internal replication setup
@@ -247,16 +255,16 @@ To create a pod that you can use as a Kafka client run the following commands:
 ### Make docker images and Push Images to Docker Hub
 
 ```shell
-docker rmi rsachdeva/illuminatingdeposits.grpc.server:v1.5.0
-docker rmi rsachdeva/illuminatingdeposits.dbindexes:v1.5.0
+docker rmi rsachdeva/illuminatingdeposits.grpc.server:v1.6.0
+docker rmi rsachdeva/illuminatingdeposits.dbindexes:v1.6.0
 
-docker build -t rsachdeva/illuminatingdeposits.grpc.server:v1.5.0 -f ./build/Dockerfile.grpc.server .  
-docker build -t rsachdeva/illuminatingdeposits.dbindexes:v1.5.0 -f ./build/Dockerfile.dbindexes .  
+docker build -t rsachdeva/illuminatingdeposits.grpc.server:v1.6.0 -f ./build/Dockerfile.grpc.server .  
+docker build -t rsachdeva/illuminatingdeposits.dbindexes:v1.6.0 -f ./build/Dockerfile.dbindexes .  
 
-docker push rsachdeva/illuminatingdeposits.grpc.server:v1.5.0
-docker push rsachdeva/illuminatingdeposits.dbindexes:v1.5.0
+docker push rsachdeva/illuminatingdeposits.grpc.server:v1.6.0
+docker push rsachdeva/illuminatingdeposits.dbindexes:v1.6.0
 ```
-The v1.5.0 should match to version being used in Kubernetes resources (grpc-server.yaml; dbindexes.yaml).
+The v1.6.0 should match to version being used in Kubernetes resources (grpc-server.yaml; dbindexes.yaml).
 
 ### Quick deploy for all Kubernetes resources ( more Detailed Kubernetes set up - Step by Step is below; Above kubernetes steps are common)
 TLS File set up should have been installed using steps above along with installing using help ingress-nginx and kafka
@@ -317,13 +325,6 @@ export DEPOSITS_GRPC_SERVICE_TLS=true
 export DEPOSITS_GRPC_SERVICE_ADDRESS=grpcserversvc.127.0.0.1.nip.io
 go run ./cmd/sanitytestclient
 ```
-With this Sanity test client, you will be able to:
-- get status of Mongo DB
-- add a new user
-- JWT generation for Authentication
-- JWT Authentication for Interest Delta Calculations for each deposit; each bank with all deposits and all banks
-  Quickly confirms Sanity check for set up with Kubernetes/Docker.
-  There are also separate Integration and Unit tests.
 
 ### Server Tracing
 Access [zipkin](https://zipkin.io/) service at [http://zipkin.127.0.0.1.nip.io](http://zipkin.127.0.0.1.nip.io)
@@ -459,4 +460,4 @@ transport: Error while dialing dial tcp
 ```
 
 # Version
-v1.5.30
+v1.6.0
