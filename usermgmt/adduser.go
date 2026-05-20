@@ -39,7 +39,7 @@ func addUser(ctx context.Context, mdb *mongo.Database, cureq *usermgmtpb.CreateU
 	res, err := coll.InsertOne(ctx, &u)
 	log.Printf("user InsertOne err is %v", err)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, fmt.Sprintf("Internal error: %v", err))
+		return nil, status.Errorf(codes.Internal, "Internal error: %v", err)
 	}
 	_, ok := res.InsertedID.(primitive.ObjectID)
 	if !ok {

@@ -1,0 +1,23 @@
+version: '2'
+
+run:
+  timeout: 5m
+  skip-dirs:
+    - node_modules/
+    - vendor/
+    - explore/
+
+linters:
+  enable:
+    - sqlclosecheck
+    - bodyclose
+    - modernize
+  exclusions:
+    paths:
+      - explore
+
+  settings:
+    errcheck:
+      exclude-functions:
+        - (*database/sql.Rows).Close
+        - (*database/sql.DB).Close

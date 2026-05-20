@@ -28,11 +28,11 @@ func verify(accessToken string) (*customClaims, error) {
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			log.Printf("interceptor verify got invalid token ve is: %v", ve)
 			if ve.Errors&(jwt.ValidationErrorExpired) != 0 {
-				return nil, status.Errorf(codes.Unauthenticated, fmt.Sprintf("Token is expired. Please recreate token: %v", err))
+				return nil, status.Errorf(codes.Unauthenticated, "Token is expired. Please recreate token: %v", err)
 			}
 		}
 		log.Printf("interceptor verify got invalid token: %v", err)
-		return nil, status.Errorf(codes.Unauthenticated, fmt.Sprintf("Verify got invalid token %v", err))
+		return nil, status.Errorf(codes.Unauthenticated, "Verify got invalid token %v", err)
 	}
 
 	claims, ok := token.Claims.(*customClaims)

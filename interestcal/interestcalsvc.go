@@ -3,7 +3,6 @@ package interestcal
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strings"
 
@@ -37,7 +36,7 @@ func (svc ServiceServer) CreateInterest(ctx context.Context, cireq *interestcalp
 
 	resp, err := svc.CalculateDelta(ctx, cireq)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, fmt.Sprintf("Interest cal invalid error: %v", err))
+		return nil, status.Errorf(codes.InvalidArgument, "Interest cal invalid error: %v", err)
 	}
 	return resp, nil
 }

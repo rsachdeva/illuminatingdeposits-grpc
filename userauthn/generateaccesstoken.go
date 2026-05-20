@@ -31,7 +31,7 @@ func generateAccessToken(ctx context.Context, mdb *mongo.Database, ctreq *userau
 	uFound, err := usermgmt.FindUserByEmail(ctx, coll, vyu.Email)
 	log.Printf("user found by email is %v", uFound)
 	if err != nil {
-		return nil, status.Errorf(codes.NotFound, fmt.Sprintf("NotFound Error: User not found for email %v", vyu.Email))
+		return nil, status.Errorf(codes.NotFound, "NotFound Error: User not found for email %v", vyu.Email)
 	}
 	log.Printf("we were actually able to find the user %v\n", uFound)
 	err = passwordMatch(uFound.PasswordHash, vyu.Password)

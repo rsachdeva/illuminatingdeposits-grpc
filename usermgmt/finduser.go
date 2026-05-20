@@ -2,7 +2,6 @@ package usermgmt
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
@@ -19,7 +18,7 @@ func FindUserByEmail(ctx context.Context, coll *mongo.Collection, email string) 
 	if err := result.Decode(&usr); err != nil {
 		return &usermgmtpb.User{}, status.Errorf(
 			codes.NotFound,
-			fmt.Sprintf("Cannot find user with specified Email: %v", err))
+			"Cannot find user with specified Email: %v", err)
 	}
 	return &usr, nil
 }
@@ -30,7 +29,7 @@ func findUserByUuid(ctx context.Context, coll *mongo.Collection, usr *usermgmtpb
 	if err := result.Decode(usr); err != nil {
 		return &usermgmtpb.User{}, status.Errorf(
 			codes.NotFound,
-			fmt.Sprintf("Cannot find user with specified uuid %v due to error: %v", uuid, err))
+			"Cannot find user with specified uuid %v due to error: %v", uuid, err)
 	}
 	return usr, nil
 }
