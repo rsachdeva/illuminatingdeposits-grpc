@@ -7,8 +7,8 @@ toolchain go1.26.2
 require (
 	contrib.go.opencensus.io/exporter/zipkin v0.1.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/golang/protobuf v1.4.3
-	github.com/google/uuid v1.1.2
+	github.com/golang/protobuf v1.5.4
+	github.com/google/uuid v1.6.0
 	github.com/openzipkin/zipkin-go v0.2.5
 	github.com/ory/dockertest v3.3.5+incompatible
 	github.com/pkg/errors v0.9.1
@@ -16,10 +16,10 @@ require (
 	github.com/stretchr/testify v1.6.1
 	go.mongodb.org/mongo-driver v1.4.4
 	go.opencensus.io v0.23.0
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
-	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
-	google.golang.org/grpc v1.34.0
-	google.golang.org/protobuf v1.25.0
+	golang.org/x/crypto v0.48.0
+	golang.org/x/oauth2 v0.36.0
+	google.golang.org/grpc v1.81.0
+	google.golang.org/protobuf v1.36.11
 )
 
 require (
@@ -49,12 +49,17 @@ require (
 	github.com/sirupsen/logrus v1.6.0 // indirect
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
-	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect
-	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
-	golang.org/x/sys v0.0.0-20201201145000-ef89a241ccb3 // indirect
-	golang.org/x/text v0.3.3 // indirect
-	google.golang.org/appengine v1.4.0 // indirect
+	golang.org/x/net v0.51.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/text v0.34.0 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.6.2 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
 	gotest.tools v2.2.0+incompatible // indirect
+)
+
+tool (
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc
+	google.golang.org/protobuf/cmd/protoc-gen-go
 )
