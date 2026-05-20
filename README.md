@@ -1,7 +1,19 @@
 # Illuminating Deposits - gRPC
 
 ###### All commands should be executed from the root directory (illuminatingdeposits-grpc) of the project
-(Development is WIP)
+
+## Requirements
+
+- Go 1.26+ — install from https://go.dev/dl/
+
+## Status
+
+- Version 0.5 — work in progress
+- This repository was originally developed on older Go versions and was upgraded to Go 1.16 in 2021
+- The repository is currently being updated to Go 1.26
+- Protobuf tooling has been refreshed and MongoDB driver migration work is in progress
+- Compile-only checks currently pass with `go test -run='^$' ./...`
+- Full integration tests are still being updated because the legacy TLS test certificates need SAN-based certificates for current Go versions
 
 <p align="center">
 <img src="./logo.png" alt="Illuminating Deposits Project Logo" title="Illuminating Deposits Project Logo" />
@@ -454,6 +466,3 @@ Otherwise you will get error as:
 ```
 transport: Error while dialing dial tcp
 ```
-
-# Version
-v1.7.0
