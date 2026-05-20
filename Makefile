@@ -31,7 +31,7 @@ fix:
 	go fix ./...
 
 update-direct-dependencies:
-	go list -m -f '{{if not .Indirect}}{{.Path}}{{end}}' all | xargs go get -u
+	go list -m -f '{{if and (not .Indirect) (not .Main)}}{{.Path}}{{end}}' all | xargs go get -u
 	go mod tidy
 
 update-all-dependencies:
