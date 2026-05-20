@@ -7,7 +7,6 @@ toolchain go1.26.2
 require (
 	contrib.go.opencensus.io/exporter/zipkin v0.1.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
 	github.com/openzipkin/zipkin-go v0.4.3
 	github.com/ory/dockertest v3.3.5+incompatible

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
@@ -14,6 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func addUser(ctx context.Context, mdb *mongo.Database, cureq *usermgmtpb.CreateUserRequest) (*usermgmtpb.CreateUserResponse, error) {
@@ -30,8 +30,8 @@ func addUser(ctx context.Context, mdb *mongo.Database, cureq *usermgmtpb.CreateU
 		Email:        n.Email,
 		PasswordHash: hash,
 		Roles:        n.Roles,
-		DateCreated:  ptypes.TimestampNow(),
-		DateUpdated:  ptypes.TimestampNow(),
+		DateCreated:  timestamppb.Now(),
+		DateUpdated:  timestamppb.Now(),
 	}
 
 	coll := mdb.Collection("user")
