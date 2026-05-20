@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/ory/dockertest"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 )
 
 // Based on Dockertest
@@ -24,7 +24,7 @@ func MongoDbConnect(ctx context.Context, timeoutSec int) (*mongo.Client, *docker
 	// as new docker container with mongodb for each connection; parallel allows faster test execution
 	// opts := dockertest.RunOptions{
 	// 	Repository:   "mongo",
-	// 	Tag:          "4.4.2-bionic",
+	// 	Tag:          "8.3",
 	// 	ExposedPorts: []string{"27017"},
 	// 	PortBindings: map[docker.Port][]docker.PortBinding{
 	// 		"27017": {
@@ -34,7 +34,7 @@ func MongoDbConnect(ctx context.Context, timeoutSec int) (*mongo.Client, *docker
 	// }
 	// resource, err := pool.RunWithOptions(&opts)
 
-	resource, err := pool.Run("mongo", "4.4.2-bionic", nil)
+	resource, err := pool.Run("mongo", "8.3", nil)
 	if resource == nil {
 		log.Fatalf("Resource issue in dockertest: %v", err)
 	}
@@ -47,7 +47,7 @@ func MongoDbConnect(ctx context.Context, timeoutSec int) (*mongo.Client, *docker
 	if err := pool.Retry(func() error {
 		uri := fmt.Sprintf("mongodb://localhost:%s", resource.GetPort("27017/tcp"))
 		log.Printf("mongodb uri is %v", uri)
-		mt, err = mongo.Connect(ctx, options.Client().ApplyURI(uri).SetServerSelectionTimeout(time.Duration(timeoutSec)*time.Second))
+		mt, err = mongo.Connect(options.Client().ApplyURI(uri).SetServerSelectionTimeout(time.Duration(timeoutSec) * time.Second))
 		if err != nil {
 			log.Fatal(err)
 		}

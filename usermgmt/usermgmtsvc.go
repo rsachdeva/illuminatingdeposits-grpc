@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.opencensus.io/trace"
 )
 

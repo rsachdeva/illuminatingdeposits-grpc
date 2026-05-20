@@ -386,7 +386,7 @@ Tests are designed to run in parallel with its own test server and docker based 
 To run all tests with coverages reports for focussed packages:
 Run following only once as tests use this image; so faster:
 ```shell
-docker pull mongo:4.4.2-bionic 
+docker pull mongo:8.3
 ``` 
 And then run the following with coverages for key packages concerned:
 ```shell

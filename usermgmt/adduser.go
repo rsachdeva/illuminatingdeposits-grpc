@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/rsachdeva/illuminatingdeposits-grpc/usermgmt/usermgmtpb"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -41,7 +41,7 @@ func addUser(ctx context.Context, mdb *mongo.Database, cureq *usermgmtpb.CreateU
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Internal error: %v", err)
 	}
-	_, ok := res.InsertedID.(primitive.ObjectID)
+	_, ok := res.InsertedID.(bson.ObjectID)
 	if !ok {
 		return nil, status.Errorf(codes.Internal, "Internal Error: Cannot convert to OID")
 	}

@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 )
 
 func Connect(ctx context.Context, timeoutSec int) *mongo.Client {
@@ -20,7 +20,7 @@ func Connect(ctx context.Context, timeoutSec int) *mongo.Client {
 	log.Printf("mongodb uri is %v\n", uri)
 	// connect to MongoDB
 	// ClientOptions.SetServerSelectionTimeout
-	mt, err := mongo.Connect(ctx, options.Client().ApplyURI(uri).SetServerSelectionTimeout(time.Duration(timeoutSec)*time.Second))
+	mt, err := mongo.Connect(options.Client().ApplyURI(uri).SetServerSelectionTimeout(time.Duration(timeoutSec) * time.Second))
 	if err != nil {
 		log.Fatal(err)
 	}

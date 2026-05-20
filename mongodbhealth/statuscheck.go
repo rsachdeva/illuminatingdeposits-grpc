@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbhealth/mongodbhealthpb"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 )
 
 func statusCheck(ctx context.Context, mt *mongo.Client) *mongodbhealthpb.HealthResponse {

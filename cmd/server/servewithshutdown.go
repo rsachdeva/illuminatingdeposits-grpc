@@ -9,7 +9,7 @@ import (
 	"os/signal"
 
 	"github.com/rsachdeva/illuminatingdeposits-grpc/mongodbconn"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 	"google.golang.org/grpc"
 )
 
